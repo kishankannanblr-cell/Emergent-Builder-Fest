@@ -1,0 +1,138 @@
+{
+  "project_info": {
+    "name": "DealCFO",
+    "type": "dashboard",
+    "theme": "Dark Slate (Zinc/Slate #09090B or #0F172A base) with Emerald accent (#10B981) and Light Mode toggle support",
+    "description": "Institutional-grade M&A Deal & Financial Intelligence Platform with Deal Pipeline Tracker, EV/EBITDA & DCF Valuation Estimator, Cash Runway Analytics, EBITDA Adjustments, and Interactive Deal Intake."
+  },
+  "typography": {
+    "font_family": {
+      "heading": "Plus Jakarta Sans, Satoshi, sans-serif",
+      "body": "Inter, system-ui, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "font_weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800
+    },
+    "scale": {
+      "h1": "text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight",
+      "h2": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "h3": "text-xl sm:text-2xl font-semibold tracking-tight",
+      "h4": "text-lg sm:text-xl font-medium",
+      "body": "text-sm sm:text-base leading-relaxed",
+      "small": "text-xs text-muted-foreground",
+      "mono_data": "font-mono text-sm tracking-wide"
+    }
+  },
+  "colors": {
+    "palette": {
+      "dark_mode": {
+        "background": "#09090b",
+        "surface": "#121215",
+        "surface_elevated": "#18181b",
+        "surface_hover": "#27272a",
+        "border": "#27272a",
+        "border_subtle": "#1f1f23",
+        "foreground": "#f4f4f5",
+        "foreground_muted": "#a1a1aa",
+        "primary": "#10b981",
+        "primary_hover": "#059669",
+        "primary_foreground": "#ffffff",
+        "accent": "#06b6d4",
+        "warning": "#f59e0b",
+        "danger": "#ef4444",
+        "success": "#10b981",
+        "info": "#3b82f6"
+      },
+      "light_mode": {
+        "background": "#f8fafc",
+        "surface": "#ffffff",
+        "surface_elevated": "#f1f5f9",
+        "surface_hover": "#e2e8f0",
+        "border": "#e2e8f0",
+        "border_subtle": "#f1f5f9",
+        "foreground": "#0f172a",
+        "foreground_muted": "#64748b",
+        "primary": "#059669",
+        "primary_hover": "#047857",
+        "primary_foreground": "#ffffff",
+        "accent": "#0891b2",
+        "warning": "#d97706",
+        "danger": "#dc2626",
+        "success": "#059669",
+        "info": "#2563eb"
+      }
+    },
+    "contrast_rules": "Always ensure text contrast passes WCAG AA standards (4.5:1 minimum). In dark mode, avoid pure black (#000000); use deep zinc/slate (#09090b or #0c0e12). Set explicit hover text colors (e.g. hover:text-emerald-400 or hover:text-white). NEVER use fully transparent backgrounds on dropdowns or overlay cards."
+  },
+  "layout_and_spacing": {
+    "grid_system": "High Density Grid (MODE B) for analytics and dashboard widgets. Responsive layout using grid-cols-1 md:grid-cols-2 lg:grid-cols-4 or 12-column grid system.",
+    "spacing_scale": "Use generous internal padding (p-4, p-6, p-8) on cards to prevent text overflow or border touch.",
+    "container_padding": "px-4 sm:px-6 lg:px-8 py-6",
+    "card_borders": "1px solid border with subtle inner highlight. Rounded radius rounded-xl or rounded-lg.",
+    "header_nav": "Sticky or fixed top header with backdrop blur (backdrop-blur-md bg-zinc-950/80 or bg-white/80), z-50, displaying logo, active workspace/deal room selector, theme toggle, search bar, and intake button."
+  },
+  "key_components_architecture": {
+    "deal_pipeline_tracker": {
+      "path": "src/components/dashboard/DealPipeline.tsx",
+      "description": "Visual Kanban/Stage flow board featuring key M&A stages: Lead Sourcing, Initial Review, NDA Signed, Confid. Teaser / CIM, IOI Submitted, LOI / Exclusivity, Due Diligence, Definitive Docs, Closed Won, Passed/Archived. Includes stage metric pills, deal valuation tags, progress sliders, and quick stage action triggers."
+    },
+    "valuation_dcf_estimator": {
+      "path": "src/components/dashboard/ValuationDCFEstimator.tsx",
+      "description": "Interactive valuation multiples (EV/EBITDA, EV/Revenue, P/E) & DCF scenario modeling calculator. Sliders & input fields for Revenue Growth %, EBITDA Margin %, WACC (Discount Rate), Terminal Growth Rate %, and Exit Multiple. Calculates Implied Enterprise Value, Equity Value, and Sensitivity Matrix table."
+    },
+    "cash_runway_burn_analytics": {
+      "path": "src/components/dashboard/CashRunwayAnalytics.tsx",
+      "description": "Cash Runway and Monthly Burn rate interactive charts (Recharts AreaChart / BarChart). Shows cash balance projection, net burn, gross burn, runway months alert badges, and scenario stress-testing (e.g., +15% hiring burn vs revenue acceleration)."
+    },
+    "deals_table_and_modal": {
+      "path": "src/components/dashboard/DealsTable.tsx",
+      "description": "Interactive deals datatable with multi-column sorting, filtering by sector/stage/size, search, pagination, status indicators, and 'New Deal Intake' modal dialog with full financial metrics form."
+    },
+    "ebitda_adjustments_schedule": {
+      "path": "src/components/dashboard/EBITDAAdjustmentsSchedule.tsx",
+      "description": "Quality of Earnings (QoE) style EBITDA bridge & adjustments schedule. Add/remove owner excess comp, one-time legal fees, non-recurring IT migrations, adjusted EBITDA calculation, and visual waterfall/bar representation."
+    },
+    "financial_kpi_cards": {
+      "path": "src/components/dashboard/KPICards.tsx",
+      "description": "4 key metric cards displaying Active Pipeline Value ($M), Avg EV/EBITDA Multiple, Portfolio Weighted Cash Runway (Months), and YTD Closed Deal Volume with sparkline trends and YoY growth indicators."
+    }
+  },
+  "motion_and_interactions": {
+    "hover_effects": "Card hover state: border-emerald-500/30 or border-zinc-700, shadow-lg, subtle hover lift -translate-y-0.5 transition-all duration-200.",
+    "transitions": "Use specific transition properties like transition-color, transition-transform, or transition-opacity. NEVER transition: all.",
+    "accessibility_motion": "Respect prefers-reduced-motion and include smooth tab transitions."
+  },
+  "visual_enhancers": {
+    "badges": "Pill-shaped badge with subtle colored backgrounds (e.g., bg-emerald-500/10 text-emerald-400 border border-emerald-500/20).",
+    "glassmorphism": "Used selectively on sticky navbar and filter bars with backdrop-blur-xl bg-zinc-950/70 border-b border-zinc-800.",
+    "borders": "Crisp 1px borders (border-zinc-800 or border-slate-200 in light mode).",
+    "shadows": "Ambient subtle elevation shadow-sm to shadow-xl."
+  },
+  "media_and_images": {
+    "image_urls": [
+      {
+        "category": "dashboard_hero_bg",
+        "url": "https://images.unsplash.com/photo-1560221328-12fe60f83ab8",
+        "description": "Close-up photo of modern financial monitor displaying dark theme trading & financial charts"
+      },
+      {
+        "category": "financial_docs",
+        "url": "https://images.unsplash.com/photo-1543286386-713bdd548da4",
+        "description": "Financial analytics papers with charts on desk"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Ensure the Vite + React build completes with zero errors (npm run build or yarn build).",
+    "Ensure dark mode is default with zinc-950/900 surfaces and vibrant emerald (#10b981) primary buttons & metrics, with a working Light Mode toggle.",
+    "Add 'data-testid' to ALL interactive elements (buttons, inputs, select triggers, table rows, tabs, modal triggers, sliders) using kebab-case role naming (e.g. data-testid='deal-intake-submit-button', data-testid='dcf-wacc-slider').",
+    "Use Lucide React icons for clean, dense institutional UI representation.",
+    "DO NOT use generic centered hero text or plain text placeholders. Fill the dashboard with rich realistic M&A mock data (e.g., SaaS, HealthTech, Industrial IoT deals, $5M - $120M EV).",
+    "Support stateful interactions: users can add deals, filter by pipeline stage, tweak DCF parameters live with instant chart updates, add EBITDA adjustment line items, and switch views seamlessly."
+  ]
+}
