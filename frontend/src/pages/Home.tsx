@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/Navbar";
+import { VoteBanner } from "@/components/layout/VoteBanner";
 import { KPICards } from "@/components/dashboard/KPICards";
 import { ExecutiveOverview } from "@/components/dashboard/ExecutiveOverview";
 import { DealPipeline } from "@/components/dashboard/DealPipeline";
@@ -240,6 +241,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       <Toaster position="top-right" richColors />
+
+      {/* Emergent Builder Fest Showcase Voting Banner */}
+      <VoteBanner />
 
       {/* Top Navigation */}
       <Navbar

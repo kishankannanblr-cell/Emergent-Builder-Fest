@@ -6,7 +6,8 @@ import {
   RefreshCw, 
   TrendingUp, 
   Search,
-  Briefcase
+  Briefcase,
+  Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -121,6 +122,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="pl-9 h-9 text-xs bg-muted/40 border-border/60 focus-visible:ring-emerald-500"
             />
           </div>
+
+          {/* Persistent Vote CTA Pill */}
+          <a
+            data-testid="nav-vote-pill-btn"
+            href="https://app.emergent.sh/showcase/builderfest-kevin/804c7bfb-1223-4463-a297-0ad569558340?utm_source=share"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 font-bold text-xs transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            title="Vote for DealCFO on Emergent Showcase"
+          >
+            <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 animate-pulse" />
+            <span className="hidden sm:inline">Vote on Showcase</span>
+            <span className="sm:hidden">Vote</span>
+          </a>
 
           {/* Reset / Reseed Demo Data */}
           <Button

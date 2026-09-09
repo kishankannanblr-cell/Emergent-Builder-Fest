@@ -90,3 +90,14 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# Local helper tools & artifacts
+mingit/
+screenshots/
+capture_dashboard_screens.js
+generate_cfo_pdf.js
+verify_vote_banner.js
+DealCFO_Executive_Guide.pdf
+DealCFO_Executive_Guide.html
+package-lock.json
+frontend/package-lock.json
