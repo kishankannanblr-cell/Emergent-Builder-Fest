@@ -97,6 +97,9 @@ screenshots/
 capture_dashboard_screens.js
 generate_cfo_pdf.js
 verify_vote_banner.js
+verify_ai_and_structurer.js
+inspect_proxy.js
+scratch_check_preview.js
 DealCFO_Executive_Guide.pdf
 DealCFO_Executive_Guide.html
 package-lock.json

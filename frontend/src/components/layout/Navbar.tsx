@@ -59,7 +59,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navTabs = [
     { id: "overview", label: "Executive Overview" },
     { id: "pipeline", label: "Deal Pipeline" },
-    { id: "valuation", label: "Valuation & DCF" },
+    { id: "valuation", label: "Valuation & Deal Structurer" },
     { id: "runway", label: "Cash & Runway" },
     { id: "ebitda", label: "EBITDA Adjustments" },
     { id: "deals", label: "All Deals Database" },

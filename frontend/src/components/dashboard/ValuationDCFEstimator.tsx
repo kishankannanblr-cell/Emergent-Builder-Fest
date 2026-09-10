@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { 
   Calculator, 
   TrendingUp, 
-  Sliders 
+  Sliders,
+  Sparkles
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { 
   ResponsiveContainer, 
   BarChart, 
@@ -20,6 +22,8 @@ import {
 } from "recharts";
 import type { Deal, DCFRequest, DCFResponse } from "@/lib/types";
 import { apiPost } from "@/lib/api";
+import { AIMarketCalibrationModal } from "./AIMarketCalibrationModal";
+import { MrWonderfulDealStructurer } from "./MrWonderfulDealStructurer";
 
 interface ValuationDCFEstimatorProps {
   deals: Deal[];
@@ -45,6 +49,27 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
 
   const [selectedDealId, setSelectedDealId] = useState<string>(initialDeal?.id ?? "");
   const [result, setResult] = useState<DCFResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<"dcf" | "shark">("dcf");
+  const [isCalibrationOpen, setIsCalibrationOpen] = useState<boolean>(false);
+  const [isCalibrated, setIsCalibrated] = useState<boolean>(false);
+
+  const activeDeal = deals.find((d) => d.id === selectedDealId) || initialDeal;
+
+  const handleApplyCalibration = (cal: {
+    growth_rate_pct: number;
+    ebitda_margin_pct: number;
+    discount_rate_wacc: number;
+    exit_multiple: number;
+  }) => {
+    setParams((prev) => ({
+      ...prev,
+      growth_rate_pct: cal.growth_rate_pct,
+      ebitda_margin_pct: cal.ebitda_margin_pct,
+      discount_rate_wacc: cal.discount_rate_wacc,
+      exit_multiple: cal.exit_multiple,
+    }));
+    setIsCalibrated(true);
+  };
 
   // When initialDeal prop changes, load it
   useEffect(() => {
@@ -190,22 +215,69 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
         </div>
       </div>
 
-      {/* Main Grid: Parameters on Left, Outputs on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Parameter Control Panel */}
-        <div className="lg:col-span-5 space-y-4">
-          <Card className="border-border/80 bg-card/60">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-bold flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-emerald-400" />
-                  Key Valuation Assumptions
-                </span>
-                <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30">
-                  Live Recalculation
-                </Badge>
-              </CardTitle>
-            </CardHeader>
+      {/* Valuation Mode Navigation: Standard DCF vs Shark Tank Royalty Structurer */}
+      <div className="flex items-center gap-2 border-b border-border/60 pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("dcf")}
+          data-testid="tab-dcf-model"
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+            activeTab === "dcf" 
+              ? "bg-emerald-600 text-white shadow-md shadow-emerald-950/40" 
+              : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+          }`}
+        >
+          <Calculator className="w-3.5 h-3.5" />
+          Standard 5-Yr DCF Valuation
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("shark")}
+          data-testid="tab-shark-tank"
+          className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
+            activeTab === "shark" 
+              ? "bg-purple-600 text-white shadow-md shadow-purple-950/40" 
+              : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/60"
+          }`}
+        >
+          <span className="text-sm">🦈</span>
+          "Mr. Wonderful" Royalty Structurer
+        </button>
+      </div>
+
+      {activeTab === "shark" ? (
+        <MrWonderfulDealStructurer deals={deals} selectedDeal={activeDeal} />
+      ) : (
+        /* Main Grid: Parameters on Left, Outputs on Right */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column: Parameter Control Panel */}
+          <div className="lg:col-span-5 space-y-4">
+            <Card className="border-border/80 bg-card/60">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-bold flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-emerald-400" />
+                    Key Valuation Assumptions
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setIsCalibrationOpen(true)}
+                      data-testid="btn-open-ai-calibration"
+                      className="h-7 text-[11px] px-2.5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
+                      {isCalibrated ? "AI Calibrated ✓" : "✨ AI Market Benchmark"}
+                    </Button>
+                    <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 hidden sm:inline-flex">
+                      Live Recalculation
+                    </Badge>
+                  </div>
+                </CardTitle>
+              </CardHeader>
 
             <CardContent className="space-y-4 text-xs">
               {/* 1. Base Revenue */}
@@ -500,6 +572,19 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
           </Card>
         </div>
       </div>
+      )}
+
+      {/* AI Market Calibration Modal */}
+      <AIMarketCalibrationModal
+        isOpen={isCalibrationOpen}
+        onClose={() => setIsCalibrationOpen(false)}
+        dealName={activeDeal?.name ?? "Custom Target Model"}
+        sector={activeDeal?.sector ?? "B2B SaaS / Enterprise Software"}
+        revenue={params.revenue_base}
+        ebitda={params.revenue_base * (params.ebitda_margin_pct / 100)}
+        currentParams={params}
+        onApply={handleApplyCalibration}
+      />
     </div>
   );
 };

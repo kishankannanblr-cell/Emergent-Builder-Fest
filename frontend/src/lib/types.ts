@@ -153,3 +153,69 @@ export interface EBITDAAdjustmentCreate {
   adjustment_type: "add_back" | "deduction";
   notes?: string;
 }
+
+export interface ValuationComps {
+  name: string;
+  sector: string;
+  ev_revenue: number;
+  ev_ebitda: number;
+  deal_type: string;
+  notes: string;
+}
+
+export interface QoEAddBack {
+  name: string;
+  category: string;
+  amount_range: string;
+  rationale: string;
+}
+
+export interface AICalibrationRequest {
+  sector: string;
+  revenue: number;
+  ebitda: number;
+  enterprise_value?: number;
+  target_name?: string;
+}
+
+export interface AICalibrationResponse {
+  sector: string;
+  target_name: string;
+  recommended_wacc: number;
+  wacc_rationale: string;
+  recommended_exit_multiple: number;
+  multiple_rationale: string;
+  recommended_cagr_pct: number;
+  cagr_rationale: string;
+  recommended_ebitda_margin_pct: number;
+  margin_rationale: string;
+  market_risk_profile: string;
+  comps_summary: string;
+  top_comps: ValuationComps[];
+  suggested_qoe_add_backs: QoEAddBack[];
+  source_benchmarks: string;
+  ai_powered: boolean;
+}
+
+export interface MrWonderfulCritiqueRequest {
+  target_name: string;
+  revenue: number;
+  ebitda: number;
+  investment_amount: number;
+  royalty_pct: number;
+  payback_cap_mult: number;
+  residual_equity_pct: number;
+  payback_months: number;
+  investor_irr_pct: number;
+}
+
+export interface MrWonderfulCritiqueResponse {
+  verdict_title: string;
+  shark_quote: string;
+  verdict_sentiment: "deal" | "caution" | "dead_to_me";
+  deal_analysis: string;
+  founder_takeaway: string;
+  suggested_counter_offer: string;
+  ai_powered: boolean;
+}
+

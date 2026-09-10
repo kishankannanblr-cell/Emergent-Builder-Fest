@@ -13,6 +13,7 @@ load_dotenv(ROOT_DIR / '.env')
 from lib.db import client, db
 from routers.deals import router as deals_router
 from routers.financials import router as financials_router
+from routers.ai import router as ai_router
 
 # Startup runs before the yield, shutdown after it.
 @asynccontextmanager
@@ -42,6 +43,7 @@ async def root():
 # Include feature routers on api_router
 api_router.include_router(deals_router)
 api_router.include_router(financials_router)
+api_router.include_router(ai_router)
 
 # Include api_router into main app
 app.include_router(api_router)
