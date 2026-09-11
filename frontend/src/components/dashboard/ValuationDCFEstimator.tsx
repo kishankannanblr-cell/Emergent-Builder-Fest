@@ -28,11 +28,13 @@ import { MrWonderfulDealStructurer } from "./MrWonderfulDealStructurer";
 interface ValuationDCFEstimatorProps {
   deals: Deal[];
   initialDeal?: Deal | null;
+  initialSubTab?: "dcf" | "shark";
 }
 
 export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
   deals,
   initialDeal = null,
+  initialSubTab = "dcf",
 }) => {
   const [params, setParams] = useState<DCFRequest>({
     revenue_base: initialDeal?.revenue ?? 25.0,
@@ -49,7 +51,7 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
 
   const [selectedDealId, setSelectedDealId] = useState<string>(initialDeal?.id ?? "");
   const [result, setResult] = useState<DCFResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<"dcf" | "shark">("dcf");
+  const [activeTab, setActiveTab] = useState<"dcf" | "shark">(initialSubTab);
   const [isCalibrationOpen, setIsCalibrationOpen] = useState<boolean>(false);
   const [isCalibrated, setIsCalibrated] = useState<boolean>(false);
 
@@ -83,6 +85,12 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
       }));
     }
   }, [initialDeal]);
+
+  useEffect(() => {
+    if (initialSubTab) {
+      setActiveTab(initialSubTab);
+    }
+  }, [initialSubTab]);
 
   const loadDealPreset = (dealId: string) => {
     setSelectedDealId(dealId);

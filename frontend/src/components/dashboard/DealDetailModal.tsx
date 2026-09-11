@@ -3,7 +3,8 @@ import {
   Building, 
   Calculator, 
   Edit3, 
-  Trash2 
+  Trash2,
+  Sparkles 
 } from "lucide-react";
 import { 
   Dialog, 
@@ -25,6 +26,7 @@ interface DealDetailModalProps {
   onDelete: (id: string) => void;
   onOpenDCF: (deal: Deal) => void;
   onStageChange: (id: string, newStage: string) => void;
+  onGenerateMemo?: (deal: Deal) => void;
 }
 
 export const DealDetailModal: React.FC<DealDetailModalProps> = ({
@@ -35,6 +37,7 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
   onDelete,
   onOpenDCF,
   onStageChange,
+  onGenerateMemo,
 }) => {
   if (!deal) return null;
 
@@ -175,6 +178,20 @@ export const DealDetailModal: React.FC<DealDetailModalProps> = ({
               <Edit3 className="w-3.5 h-3.5" />
               <span>Edit</span>
             </Button>
+            {onGenerateMemo && (
+              <Button
+                data-testid="detail-generate-ic-memo-btn"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  onGenerateMemo(deal);
+                }}
+                className="text-xs gap-1.5 border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-purple-400 animate-pulse" />
+                <span>AI Investment Memo (1-Pager)</span>
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center gap-2">

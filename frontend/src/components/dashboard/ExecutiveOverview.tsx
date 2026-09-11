@@ -31,6 +31,8 @@ interface ExecutiveOverviewProps {
   onOpenDCF: (deal: Deal) => void;
   onNavigateTab: (tab: string) => void;
   onNewDealClick: () => void;
+  onGenerateMemo?: (deal: Deal) => void;
+  onLaunchSharkTank?: () => void;
 }
 
 const SECTOR_COLORS = ["#10b981", "#06b6d4", "#f59e0b", "#8b5cf6", "#ec4899", "#3b82f6", "#14b8a6", "#f43f5e"];
@@ -41,6 +43,8 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
   onSelectDeal,
   onOpenDCF,
   onNavigateTab,
+  onGenerateMemo,
+  onLaunchSharkTank,
 }) => {
   const topDeals = deals
     .filter((d) => d.stage !== "Passed" && d.stage !== "Closed Won")
@@ -109,6 +113,47 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
               <span>Deal Pipeline</span>
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Featured for Judge Kevin O'Leary Showcase Banner */}
+      <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-950/70 via-purple-900/30 to-zinc-950 border border-purple-500/40 p-5 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-xl shrink-0">
+            🦈
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/40 text-[10px] font-bold px-2 py-0.5">
+                FEATURED FOR JUDGE KEVIN O'LEARY
+              </Badge>
+              <span className="text-[11px] text-purple-300/80 font-medium">Shark Tank Valuation Engine</span>
+            </div>
+            <h3 className="text-base font-bold text-white tracking-tight">
+              "Mr. Wonderful" Royalty & Deal Structurer + Gemini Market Comps
+            </h3>
+            <p className="text-xs text-zinc-300 leading-relaxed max-w-2xl">
+              Model Kevin's signature Shark Tank deal structures ($ upfront + % royalty until 2x payback + perpetual equity) with instant IRR, 5-year cashflow schedules, and authentic AI deal critiques.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Button
+            size="sm"
+            onClick={() => {
+              if (onLaunchSharkTank) {
+                onLaunchSharkTank();
+              } else {
+                onNavigateTab("valuation");
+              }
+            }}
+            data-testid="hero-launch-shark-tank-btn"
+            className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs gap-1.5 shadow-md shadow-purple-900/50 cursor-pointer"
+          >
+            <span>🦈 Launch Deal Structurer</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Button>
         </div>
       </div>
 
@@ -256,22 +301,37 @@ export const ExecutiveOverview: React.FC<ExecutiveOverviewProps> = ({
                 </div>
 
                 <div 
-                  className="flex items-center justify-between pt-1 border-t border-border/40"
+                  className="flex items-center justify-between pt-1 border-t border-border/40 gap-1.5"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <span className="text-[10px] text-muted-foreground truncate max-w-[100px]">
+                  <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
                     {deal.lead_partner}
                   </span>
-                  <Button
-                    data-testid={`overview-btn-dcf-${deal.id}`}
-                    variant="outline"
-                    size="xs"
-                    onClick={() => onOpenDCF(deal)}
-                    className="h-6 text-[10px] px-2 gap-1 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
-                  >
-                    <Calculator className="w-3.5 h-3.5" />
-                    <span>DCF Model</span>
-                  </Button>
+                  <div className="flex items-center gap-1.5">
+                    {onGenerateMemo && (
+                      <Button
+                        data-testid={`overview-btn-memo-${deal.id}`}
+                        variant="outline"
+                        size="xs"
+                        onClick={() => onGenerateMemo(deal)}
+                        className="h-6 text-[10px] px-2 gap-1 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                        title="AI Investment Memo (1-Pager)"
+                      >
+                        <Sparkles className="w-3 h-3 text-purple-400" />
+                        <span>AI Memo</span>
+                      </Button>
+                    )}
+                    <Button
+                      data-testid={`overview-btn-dcf-${deal.id}`}
+                      variant="outline"
+                      size="xs"
+                      onClick={() => onOpenDCF(deal)}
+                      className="h-6 text-[10px] px-2 gap-1 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                    >
+                      <Calculator className="w-3.5 h-3.5" />
+                      <span>DCF</span>
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -7,7 +7,8 @@ import {
   Edit3, 
   Trash2, 
   Download, 
-  Plus 
+  Plus,
+  Sparkles 
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,7 @@ interface DealsTableProps {
   onOpenDCF: (deal: Deal) => void;
   onStageChange: (id: string, stage: string) => void;
   onNewDealClick: () => void;
+  onGenerateMemo?: (deal: Deal) => void;
 }
 
 export const DealsTable: React.FC<DealsTableProps> = ({
@@ -33,6 +35,7 @@ export const DealsTable: React.FC<DealsTableProps> = ({
   onOpenDCF,
   onStageChange,
   onNewDealClick,
+  onGenerateMemo,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStage, setSelectedStage] = useState("All");
@@ -326,6 +329,18 @@ export const DealsTable: React.FC<DealsTableProps> = ({
                     {/* Actions */}
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1">
+                        {onGenerateMemo && (
+                          <Button
+                            data-testid={`table-btn-memo-${deal.id}`}
+                            variant="ghost"
+                            size="icon-xs"
+                            onClick={() => onGenerateMemo(deal)}
+                            className="h-6 w-6 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+                            title="AI Investment Committee Memo"
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                          </Button>
+                        )}
                         <Button
                           data-testid={`table-btn-dcf-${deal.id}`}
                           variant="ghost"

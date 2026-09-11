@@ -252,6 +252,57 @@ Generated via DealCFO Dashboard
             </CardHeader>
 
             <CardContent className="space-y-4 text-xs">
+              {/* Signature Shark Presets */}
+              <div className="space-y-1.5 pb-1 border-b border-border/40">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    Signature Shark Presets
+                  </span>
+                  <span className="text-[10px] text-purple-400 font-medium">1-Click Apply</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvestmentAmount(2.0);
+                      setRoyaltyPct(5.0);
+                      setPaybackCapMult(2.0);
+                      setResidualEquityPct(3.0);
+                    }}
+                    className="p-1.5 text-left rounded-md bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all text-xs group"
+                  >
+                    <div className="font-bold text-purple-300 text-[11px] group-hover:text-purple-200">🦈 Classic</div>
+                    <div className="text-[9px] text-muted-foreground font-mono">5% / 2x / 3% Eq</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvestmentAmount(1.5);
+                      setRoyaltyPct(8.0);
+                      setPaybackCapMult(1.5);
+                      setResidualEquityPct(1.5);
+                    }}
+                    className="p-1.5 text-left rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all text-xs group"
+                  >
+                    <div className="font-bold text-emerald-300 text-[11px] group-hover:text-emerald-200">⚡ Velocity</div>
+                    <div className="text-[9px] text-muted-foreground font-mono">8% / 1.5x / 1.5% Eq</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setInvestmentAmount(3.0);
+                      setRoyaltyPct(4.0);
+                      setPaybackCapMult(1.75);
+                      setResidualEquityPct(0.0);
+                    }}
+                    className="p-1.5 text-left rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 transition-all text-xs group"
+                  >
+                    <div className="font-bold text-cyan-300 text-[11px] group-hover:text-cyan-200">🛡️ Shield</div>
+                    <div className="text-[9px] text-muted-foreground font-mono">4% / 1.75x / 0% Eq</div>
+                  </button>
+                </div>
+              </div>
+
               {/* 1. Cash Investment */}
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">

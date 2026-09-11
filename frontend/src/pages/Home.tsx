@@ -11,6 +11,7 @@ import { EBITDAAdjustmentsSchedule } from "@/components/dashboard/EBITDAAdjustme
 import { DealsTable } from "@/components/dashboard/DealsTable";
 import { DealIntakeModal } from "@/components/dashboard/DealIntakeModal";
 import { DealDetailModal } from "@/components/dashboard/DealDetailModal";
+import { AIInvestmentMemoModal } from "@/components/dashboard/AIInvestmentMemoModal";
 import { Toaster } from "@/components/ui/sonner";
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/api";
 import type { Deal, DealCreate, DealUpdate, FinancialOverview, CashRunwayResponse } from "@/lib/types";
@@ -113,18 +114,116 @@ const FALLBACK_DEALS: Deal[] = [
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   },
+  {
+    id: "demo-6",
+    name: "EcoGrid Energy Analytics",
+    target_company: "EcoGrid Analytics Inc.",
+    sector: "CleanTech / Energy",
+    deal_type: "Growth Equity",
+    stage: "CIM Review",
+    enterprise_value: 28.5,
+    revenue: 11.0,
+    ebitda: 2.1,
+    ebitda_multiple: 13.6,
+    lead_partner: "Elena Rostova",
+    probability_pct: 40,
+    cash_required: 14.5,
+    target_close_date: "2025-11-05",
+    notes: "Smart grid distribution optimization software. Strong utility pilot traction.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "demo-7",
+    name: "OmniReach Marketing Automation",
+    target_company: "OmniReach Media Labs",
+    sector: "MarTech / SaaS",
+    deal_type: "Bolt-On Add-on",
+    stage: "Lead Sourcing",
+    enterprise_value: 19.0,
+    revenue: 7.2,
+    ebitda: 1.9,
+    ebitda_multiple: 10.0,
+    lead_partner: "Sarah Chen",
+    probability_pct: 20,
+    cash_required: 12.0,
+    target_close_date: "2026-01-30",
+    notes: "Synergistic add-on to existing portfolio company MediaHub. Broker outreach complete.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "demo-8",
+    name: "Hyperion Aerospace Subsystems",
+    target_company: "Hyperion Dynamics",
+    sector: "Defense & Aerospace",
+    deal_type: "100% Buyout",
+    stage: "Closed Won",
+    enterprise_value: 52.0,
+    revenue: 18.5,
+    ebitda: 5.2,
+    ebitda_multiple: 10.0,
+    lead_partner: "Marcus Vance",
+    probability_pct: 100,
+    cash_required: 38.0,
+    target_close_date: "2025-05-15",
+    notes: "Closed and funded in Q2. 100-day value creation plan in motion.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "demo-9",
+    name: "MedSync EHR Gateway",
+    target_company: "MedSync Software LLC",
+    sector: "HealthTech",
+    deal_type: "Bolt-On Add-on",
+    stage: "NDA Signed",
+    enterprise_value: 14.5,
+    revenue: 5.0,
+    ebitda: 1.2,
+    ebitda_multiple: 12.1,
+    lead_partner: "David Kim",
+    probability_pct: 35,
+    cash_required: 9.5,
+    target_close_date: "2025-11-30",
+    notes: "Teaser reviewed, NDA signed. Awaiting management presentation and data room access.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: "demo-10",
+    name: "NovaWave Telemetry Systems",
+    target_company: "NovaWave Technologies",
+    sector: "Industrial IoT",
+    deal_type: "100% Buyout",
+    stage: "Passed",
+    enterprise_value: 9.8,
+    revenue: 3.5,
+    ebitda: 0.8,
+    ebitda_multiple: 12.3,
+    lead_partner: "Elena Rostova",
+    probability_pct: 0,
+    cash_required: 7.0,
+    target_close_date: "2025-04-10",
+    notes: "Passed after technical audit showed significant legacy tech debt and customer concentration.",
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
 ];
 
 export default function Home() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<string>("overview");
-  const [searchTerm, setSearchTerm] = useState<string>("" );
+  const [valuationSubTab, setValuationSubTab] = useState<"dcf" | "shark">("dcf");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   // Modals state
   const [isIntakeOpen, setIsIntakeOpen] = useState<boolean>(false);
   const [dealToEdit, setDealToEdit] = useState<Deal | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [dcfSelectedDeal, setDcfSelectedDeal] = useState<Deal | null>(null);
+  const [memoDeal, setMemoDeal] = useState<Deal | null>(null);
+  const [isMemoOpen, setIsMemoOpen] = useState<boolean>(false);
   const [isSeeding, setIsSeeding] = useState<boolean>(false);
 
   // Queries
@@ -225,6 +324,11 @@ export default function Home() {
     toast.info(`Loaded "${deal.name}" into Valuation & DCF Estimator`);
   };
 
+  const handleOpenMemo = (deal: Deal) => {
+    setMemoDeal(deal);
+    setIsMemoOpen(true);
+  };
+
   const handleEditDeal = (deal: Deal) => {
     setDealToEdit(deal);
     setIsIntakeOpen(true);
@@ -272,10 +376,23 @@ export default function Home() {
               deals={deals}
               onSelectDeal={(d) => setSelectedDeal(d)}
               onOpenDCF={handleOpenDCF}
-              onNavigateTab={(t) => setActiveTab(t)}
+              onNavigateTab={(t) => {
+                if (t === "valuation-shark") {
+                  setValuationSubTab("shark");
+                  setActiveTab("valuation");
+                } else {
+                  if (t === "valuation") setValuationSubTab("dcf");
+                  setActiveTab(t);
+                }
+              }}
               onNewDealClick={() => {
                 setDealToEdit(null);
                 setIsIntakeOpen(true);
+              }}
+              onGenerateMemo={handleOpenMemo}
+              onLaunchSharkTank={() => {
+                setValuationSubTab("shark");
+                setActiveTab("valuation");
               }}
             />
           )}
@@ -288,6 +405,7 @@ export default function Home() {
                 onSelectDeal={(d) => setSelectedDeal(d)}
                 onOpenDCF={handleOpenDCF}
                 onDeleteDeal={handleDeleteDeal}
+                onGenerateMemo={handleOpenMemo}
               />
             </div>
           )}
@@ -297,6 +415,7 @@ export default function Home() {
               <ValuationDCFEstimator
                 deals={deals}
                 initialDeal={dcfSelectedDeal}
+                initialSubTab={valuationSubTab}
               />
             </div>
           )}
@@ -326,6 +445,7 @@ export default function Home() {
                   setDealToEdit(null);
                   setIsIntakeOpen(true);
                 }}
+                onGenerateMemo={handleOpenMemo}
               />
             </div>
           )}
@@ -373,6 +493,18 @@ export default function Home() {
             setSelectedDeal({ ...selectedDeal, stage });
           }
         }}
+        onGenerateMemo={handleOpenMemo}
+      />
+
+      {/* AI Investment Committee Memo Modal */}
+      <AIInvestmentMemoModal
+        deal={memoDeal}
+        isOpen={isMemoOpen}
+        onClose={() => {
+          setIsMemoOpen(false);
+          setMemoDeal(null);
+        }}
+        onOpenDCF={handleOpenDCF}
       />
     </div>
   );

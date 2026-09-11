@@ -100,6 +100,8 @@ verify_vote_banner.js
 verify_ai_and_structurer.js
 inspect_proxy.js
 scratch_check_preview.js
+check_public_host.js
+inspect_live_preview.js
 DealCFO_Executive_Guide.pdf
 DealCFO_Executive_Guide.html
 package-lock.json

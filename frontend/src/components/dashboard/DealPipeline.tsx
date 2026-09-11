@@ -4,7 +4,8 @@ import {
   ChevronLeft, 
   Calculator, 
   Trash2, 
-  Building
+  Building,
+  Sparkles
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ interface DealPipelineProps {
   onSelectDeal: (deal: Deal) => void;
   onOpenDCF: (deal: Deal) => void;
   onDeleteDeal: (dealId: string) => void;
+  onGenerateMemo?: (deal: Deal) => void;
 }
 
 const PIPELINE_STAGES = [
@@ -38,6 +40,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
   onSelectDeal,
   onOpenDCF,
   onDeleteDeal,
+  onGenerateMemo,
 }) => {
   const [activeFilterSector, setActiveFilterSector] = useState<string>("All");
 
@@ -228,6 +231,18 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                             </div>
 
                             <div className="flex items-center gap-1">
+                              {onGenerateMemo && (
+                                <Button
+                                  data-testid={`btn-memo-deal-${deal.id}`}
+                                  variant="ghost"
+                                  size="icon-xs"
+                                  onClick={() => onGenerateMemo(deal)}
+                                  className="h-6 w-6 text-muted-foreground hover:text-purple-400"
+                                  title="Generate AI Investment Memo"
+                                >
+                                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                                </Button>
+                              )}
                               <Button
                                 data-testid={`btn-dcf-deal-${deal.id}`}
                                 variant="ghost"
