@@ -147,3 +147,79 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(161, 161, 170, 0.4);
 }
+
+/* Tab Pane Transition Animation */
+.tab-pane-enter {
+  animation: tabPaneFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabPaneFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Interactive Range Sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(161, 161, 170, 0.15);
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]:hover {
+  background: rgba(161, 161, 170, 0.25);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: currentColor;
+  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 14px currentColor;
+}
+
+/* Subtle Shimmer & Glow Keyframes */
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+/* Print Styles for AI Investment Memo */
+@media print {
+  header, footer, nav, .no-print, [data-testid="emergent-vote-banner"] {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}
