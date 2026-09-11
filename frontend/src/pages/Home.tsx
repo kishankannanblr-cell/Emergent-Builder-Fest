@@ -371,36 +371,34 @@ export default function Home() {
         {/* Tab Content Panes */}
         <div className="pt-2">
           {activeTab === "overview" && (
-            <div className="tab-pane-enter">
-              <ExecutiveOverview
-                overview={overviewData}
-                deals={deals}
-                onSelectDeal={(d) => setSelectedDeal(d)}
-                onOpenDCF={handleOpenDCF}
-                onNavigateTab={(t) => {
-                  if (t === "valuation-shark") {
-                    setValuationSubTab("shark");
-                    setActiveTab("valuation");
-                  } else {
-                    if (t === "valuation") setValuationSubTab("dcf");
-                    setActiveTab(t);
-                  }
-                }}
-                onNewDealClick={() => {
-                  setDealToEdit(null);
-                  setIsIntakeOpen(true);
-                }}
-                onGenerateMemo={handleOpenMemo}
-                onLaunchSharkTank={() => {
+            <ExecutiveOverview
+              overview={overviewData}
+              deals={deals}
+              onSelectDeal={(d) => setSelectedDeal(d)}
+              onOpenDCF={handleOpenDCF}
+              onNavigateTab={(t) => {
+                if (t === "valuation-shark") {
                   setValuationSubTab("shark");
                   setActiveTab("valuation");
-                }}
-              />
-            </div>
+                } else {
+                  if (t === "valuation") setValuationSubTab("dcf");
+                  setActiveTab(t);
+                }
+              }}
+              onNewDealClick={() => {
+                setDealToEdit(null);
+                setIsIntakeOpen(true);
+              }}
+              onGenerateMemo={handleOpenMemo}
+              onLaunchSharkTank={() => {
+                setValuationSubTab("shark");
+                setActiveTab("valuation");
+              }}
+            />
           )}
 
           {activeTab === "pipeline" && (
-            <div className="tab-pane-enter space-y-4">
+            <div className="space-y-4">
               <DealPipeline
                 deals={deals}
                 onStageChange={handleStageChange}
@@ -413,7 +411,7 @@ export default function Home() {
           )}
 
           {activeTab === "valuation" && (
-            <div className="tab-pane-enter space-y-4">
+            <div className="space-y-4">
               <ValuationDCFEstimator
                 deals={deals}
                 initialDeal={dcfSelectedDeal}
@@ -423,19 +421,19 @@ export default function Home() {
           )}
 
           {activeTab === "runway" && (
-            <div className="tab-pane-enter space-y-4">
+            <div className="space-y-4">
               <CashRunwayAnalytics initialRunway={runwayData} />
             </div>
           )}
 
           {activeTab === "ebitda" && (
-            <div className="tab-pane-enter space-y-4">
+            <div className="space-y-4">
               <EBITDAAdjustmentsSchedule />
             </div>
           )}
 
           {activeTab === "deals" && (
-            <div className="tab-pane-enter space-y-4">
+            <div className="space-y-4">
               <DealsTable
                 deals={deals}
                 onSelectDeal={(d) => setSelectedDeal(d)}
