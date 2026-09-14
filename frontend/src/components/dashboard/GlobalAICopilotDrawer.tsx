@@ -640,11 +640,11 @@ Regarding your inquiry: *"${query}"* on **${company}**:
               <span className="text-[10px] font-bold tracking-wider uppercase text-slate-500 whitespace-nowrap">
                 ⚡ Automations:
               </span>
-              {quickAutomations.map((auto, i) => {
+              {quickAutomations.map((auto) => {
                 const Icon = auto.icon;
                 return (
                   <button
-                    key={i}
+                    key={auto.title}
                     onClick={() => {
                       if (auto.personaTrigger) setPersona(auto.personaTrigger);
                       handleSendMessage(auto.query);
@@ -695,7 +695,7 @@ Regarding your inquiry: *"${query}"* on **${company}**:
                       <div className="mt-3 pt-2.5 border-t border-white/[0.08] flex flex-wrap gap-1.5">
                         {msg.suggestedActions.map((action, idx) => (
                           <button
-                            key={idx}
+                            key={`${action.action_type}-${action.label}-${idx}`}
                             onClick={() => handleActionClick(action)}
                             className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-300 transition-colors"
                           >

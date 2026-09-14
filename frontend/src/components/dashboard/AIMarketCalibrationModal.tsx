@@ -318,8 +318,8 @@ export const AIMarketCalibrationModal: React.FC<AIMarketCalibrationModalProps> =
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border/40 font-mono">
-                      {calibration.top_comps.map((c, i) => (
-                        <tr key={i} className="hover:bg-muted/20 transition-colors">
+                      {calibration.top_comps.map((c) => (
+                        <tr key={`${c.name}-${c.sector}`} className="hover:bg-muted/20 transition-colors">
                           <td className="p-2.5 font-semibold text-foreground font-sans">{c.name}</td>
                           <td className="p-2.5 text-muted-foreground font-sans">{c.sector}</td>
                           <td className="p-2.5 text-center text-cyan-400">{c.ev_revenue}x</td>
@@ -342,8 +342,8 @@ export const AIMarketCalibrationModal: React.FC<AIMarketCalibrationModalProps> =
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  {calibration.suggested_qoe_add_backs.map((q, idx) => (
-                    <div key={idx} className="p-2.5 rounded-md bg-amber-500/5 border border-amber-500/20 space-y-1">
+                  {calibration.suggested_qoe_add_backs.map((q) => (
+                    <div key={q.name} className="p-2.5 rounded-md bg-amber-500/5 border border-amber-500/20 space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-foreground text-[11px]">{q.name}</span>
                         <Badge variant="outline" className="text-[10px] text-amber-400 border-amber-500/30">

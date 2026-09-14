@@ -101,8 +101,8 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) return parsed;
         }
-      } catch {
-        // use fallback
+      } catch (err) {
+        console.debug("QoE: Using local storage fallback", err);
       }
     }
     return DEFAULT_QOE_ADJUSTMENTS;
@@ -127,8 +127,8 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
           localStorage.setItem("dealCfoQoEAdjustments", JSON.stringify(res));
         }
       }
-    } catch {
-      // Retain fallback adjustments in client/preview mode
+    } catch (err) {
+      console.debug("QoE: API unavailable, using standard adjustments schedule", err);
     }
   };
 
@@ -169,7 +169,8 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
         adjustment_type: "add_back",
         notes: "",
       });
-    } catch {
+    } catch (err) {
+      console.debug("QoE: API unavailable, executing local add-back fallback", err);
       // Local fallback creation
       const localCreated: EBITDAAdjustment = {
         id: `qoe-${Date.now()}`,
@@ -203,7 +204,8 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
   const handleDeleteAdjustment = async (id: string) => {
     try {
       await apiDelete(`/financials/ebitda-adjustments/${id}`);
-    } catch {
+    } catch (err) {
+      console.debug("QoE: API unavailable, continuing with local delete", err);
       // Continue with local delete
     }
     setAdjustments((prev) => {

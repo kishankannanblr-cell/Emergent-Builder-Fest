@@ -267,6 +267,14 @@ async def mr_wonderful_critique(req: MrWonderfulCritiqueRequest):
     royalty_as_pct_of_ebitda = (annual_royalty / req.ebitda * 100) if req.ebitda > 0 else 999.0
     total_cap_amount = req.investment_amount * req.payback_cap_mult
 
+    # Initialize all critique response fields with default values
+    sentiment = "deal"
+    title = ""
+    quote = ""
+    analysis = ""
+    takeaway = ""
+    counter = ""
+
     # Tier 1: EBITDA Choke Warning (>45% of EBITDA)
     if req.ebitda <= 0 or royalty_as_pct_of_ebitda > 45.0:
         sentiment = "choke_warning"
@@ -346,6 +354,10 @@ async def copilot_chat(req: AICopilotChatRequest):
     rev = (req.context or {}).get("revenue", 14.2)
     ebitda = (req.context or {}).get("ebitda", 4.2)
     wacc = (req.context or {}).get("wacc", 10.5)
+
+    # Initialize defaults to guarantee definition across all code paths
+    reply: str = ""
+    actions: List[AICopilotAction] = []
 
     # 1. Try Google Gemini API if key is available and not forced offline
     if GEMINI_API_KEY and req.model != "institutional-offline":
