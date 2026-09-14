@@ -111,7 +111,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
   return (
     <div className="space-y-6">
       {/* Top Banner & Scenario Switcher */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/20 border border-border/80 p-4 rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 obsidian-card p-4 rounded-xl">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <Flame className="w-5 h-5 text-amber-400" />
@@ -129,7 +129,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
             variant={scenario === "base" ? "default" : "outline"}
             size="xs"
             onClick={() => setScenario("base")}
-            className={`text-xs ${scenario === "base" ? "bg-emerald-500 text-slate-950 font-bold" : ""}`}
+            className={`text-xs ${scenario === "base" ? "amber-gradient-btn font-bold" : ""}`}
           >
             Base Case
           </Button>
@@ -165,7 +165,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
 
       {/* KPI Cards for Runway */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-card/60 border-border/80 p-4">
+        <Card className="obsidian-card p-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Current Reserves</span>
             <ArrowUpCircle className="w-4 h-4 text-emerald-400" />
@@ -176,7 +176,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
           <p className="text-[11px] text-muted-foreground mt-1">Available Dry Powder</p>
         </Card>
 
-        <Card className="bg-card/60 border-border/80 p-4">
+        <Card className="obsidian-card p-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Net Monthly Burn</span>
             <TrendingDown className="w-4 h-4 text-rose-400" />
@@ -187,7 +187,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
           <p className="text-[11px] text-muted-foreground mt-1">{scenarioMultiplier.label}</p>
         </Card>
 
-        <Card className="bg-card/60 border-border/80 p-4">
+        <Card className="obsidian-card p-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Calculated Runway</span>
             <Clock className="w-4 h-4 text-amber-400" />
@@ -205,7 +205,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
           </div>
         </Card>
 
-        <Card className="bg-card/60 border-border/80 p-4">
+        <Card className="obsidian-card p-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
             <span>Zero-Cash Horizon</span>
             <ShieldAlert className="w-4 h-4 text-purple-400" />
@@ -220,7 +220,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
       {/* Visual Charts: Cash Trajectory & Burn Composition */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Cash Balance Area Chart */}
-        <Card className="lg:col-span-7 border-border/80 bg-card/60 p-4">
+        <Card className="lg:col-span-7 obsidian-card p-4">
           <div className="flex items-center justify-between pb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               12-Month Projected Cash Balance ($M)
@@ -234,8 +234,8 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
               <AreaChart data={displayedProjections} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="cashGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0.0} />
+                    <stop offset="5%" stopColor="#ff7a00" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="#ff7a00" stopOpacity={0.0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#27272a" opacity={0.5} />
@@ -245,14 +245,14 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
                   contentStyle={{ backgroundColor: "#18181b", borderColor: "#27272a", borderRadius: "8px", fontSize: "12px" }}
                   formatter={(val: any) => [`$${val}M`, "Cash Balance"]}
                 />
-                <Area type="monotone" dataKey="cash_balance" stroke="#10b981" strokeWidth={2.5} fillOpacity={1} fill="url(#cashGrad)" />
+                <Area type="monotone" dataKey="cash_balance" stroke="#ff7a00" strokeWidth={2.5} fillOpacity={1} fill="url(#cashGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* Gross Burn vs Revenue Bar Chart */}
-        <Card className="lg:col-span-5 border-border/80 bg-card/60 p-4">
+        <Card className="lg:col-span-5 obsidian-card p-4">
           <div className="flex items-center justify-between pb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Monthly Burn vs Revenue Inflows ($M)
@@ -278,7 +278,7 @@ export const CashRunwayAnalytics: React.FC<CashRunwayAnalyticsProps> = ({ initia
       </div>
 
       {/* Projection Table */}
-      <Card className="border-border/80 bg-card/60">
+      <Card className="obsidian-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
             Monthly Liquidity Schedule Breakdown

@@ -52,13 +52,13 @@
 }
 
 :root {
-    --background: #f8fafc;
+    --background: #f4f6fa;
     --foreground: #0f172a;
     --card: #ffffff;
     --card-foreground: #0f172a;
     --popover: #ffffff;
     --popover-foreground: #0f172a;
-    --primary: #059669;
+    --primary: #ea580c;
     --primary-foreground: #ffffff;
     --secondary: #f1f5f9;
     --secondary-foreground: #0f172a;
@@ -69,55 +69,55 @@
     --destructive: #ef4444;
     --border: #e2e8f0;
     --input: #e2e8f0;
-    --ring: #10b981;
-    --chart-1: #10b981;
-    --chart-2: #06b6d4;
-    --chart-3: #f59e0b;
+    --ring: #ea580c;
+    --chart-1: #ea580c;
+    --chart-2: #0284c7;
+    --chart-3: #10b981;
     --chart-4: #8b5cf6;
-    --chart-5: #ec4899;
+    --chart-5: #f43f5e;
     --radius: 0.625rem;
-    --sidebar: #f8fafc;
+    --sidebar: #ffffff;
     --sidebar-foreground: #0f172a;
-    --sidebar-primary: #059669;
+    --sidebar-primary: #ea580c;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f1f5f9;
+    --sidebar-accent: #f8fafc;
     --sidebar-accent-foreground: #0f172a;
     --sidebar-border: #e2e8f0;
-    --sidebar-ring: #10b981;
+    --sidebar-ring: #ea580c;
 }
 
 .dark {
-    --background: #09090b;
-    --foreground: #f4f4f5;
-    --card: #121215;
-    --card-foreground: #f4f4f5;
-    --popover: #18181b;
-    --popover-foreground: #f4f4f5;
-    --primary: #10b981;
-    --primary-foreground: #09090b;
-    --secondary: #18181b;
-    --secondary-foreground: #f4f4f5;
-    --muted: #1e1e24;
-    --muted-foreground: #a1a1aa;
-    --accent: #27272a;
-    --accent-foreground: #f4f4f5;
+    --background: #0b0d13;
+    --foreground: #f8fafc;
+    --card: #12151f;
+    --card-foreground: #f8fafc;
+    --popover: #151826;
+    --popover-foreground: #f8fafc;
+    --primary: #ff7a00;
+    --primary-foreground: #0b0d13;
+    --secondary: #181c28;
+    --secondary-foreground: #f8fafc;
+    --muted: #161a26;
+    --muted-foreground: #94a3b8;
+    --accent: #222738;
+    --accent-foreground: #f8fafc;
     --destructive: #f43f5e;
-    --border: #27272a;
-    --input: #27272a;
-    --ring: #10b981;
-    --chart-1: #10b981;
-    --chart-2: #06b6d4;
-    --chart-3: #f59e0b;
+    --border: #222636;
+    --input: #222636;
+    --ring: #ff7a00;
+    --chart-1: #ff7a00;
+    --chart-2: #10b981;
+    --chart-3: #38bdf8;
     --chart-4: #a855f7;
     --chart-5: #f43f5e;
-    --sidebar: #09090b;
-    --sidebar-foreground: #f4f4f5;
-    --sidebar-primary: #10b981;
-    --sidebar-primary-foreground: #09090b;
-    --sidebar-accent: #18181b;
-    --sidebar-accent-foreground: #f4f4f5;
-    --sidebar-border: #27272a;
-    --sidebar-ring: #10b981;
+    --sidebar: #0b0d13;
+    --sidebar-foreground: #f8fafc;
+    --sidebar-primary: #ff7a00;
+    --sidebar-primary-foreground: #0b0d13;
+    --sidebar-accent: #181c28;
+    --sidebar-accent-foreground: #f8fafc;
+    --sidebar-border: #222636;
+    --sidebar-ring: #ff7a00;
 }
 
 @layer base {
@@ -132,6 +132,42 @@
   }
 }
 
+/* Obsidian Ambient Glow & Glass Utilities */
+.obsidian-canvas {
+  background-color: #0b0d13;
+  background-image: radial-gradient(circle at 50% 0%, rgba(255, 122, 0, 0.06) 0%, transparent 60%);
+}
+
+.obsidian-card {
+  background-color: rgba(18, 21, 31, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.obsidian-card-hover {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.obsidian-card-hover:hover {
+  border-color: rgba(255, 122, 0, 0.35);
+  box-shadow: 0 10px 30px -10px rgba(255, 122, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.amber-gradient-btn {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff5722 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 rgba(255, 87, 34, 0.35);
+}
+.amber-gradient-btn:hover {
+  background: linear-gradient(135deg, #ffa033 0%, #ff6b3b 100%);
+  box-shadow: 0 6px 20px 0 rgba(255, 87, 34, 0.45);
+}
+
+.peak-bar-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #ff9500 25%, #ff5722 100%);
+  box-shadow: 0 0 16px rgba(255, 122, 0, 0.4);
+}
+
 /* Custom Financial UI Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
@@ -141,9 +177,240 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(161, 161, 170, 0.2);
+  background: rgba(148, 163, 184, 0.2);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(161, 161, 170, 0.4);
+  background: rgba(255, 122, 0, 0.4);
 }
+
+/* ==========================================================================
+   LIGHT MODE INSTITUTIONAL THEME SYSTEM
+   Transforms all hardcoded obsidian tokens into crisp, high-contrast light mode
+   ========================================================================== */
+html.light body,
+html:not(.dark) body {
+  background-color: #f4f6fa !important;
+  color: #0f172a !important;
+}
+
+html.light .obsidian-canvas,
+html:not(.dark) .obsidian-canvas {
+  background-color: #f4f6fa !important;
+  background-image: radial-gradient(circle at 50% 0%, rgba(234, 88, 12, 0.04) 0%, transparent 60%) !important;
+}
+
+html.light .obsidian-card,
+html:not(.dark) .obsidian-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.light .obsidian-card-hover:hover,
+html:not(.dark) .obsidian-card-hover:hover {
+  border-color: #fdba74 !important;
+  box-shadow: 0 10px 25px -5px rgba(234, 88, 12, 0.12) !important;
+}
+
+/* Structural Shell Overrides */
+html.light aside,
+html:not(.dark) aside {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light header,
+html:not(.dark) header {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+html.light footer,
+html:not(.dark) footer {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Card & Surface Containers in Light Mode */
+html.light [class*="bg-[#090b12]"],
+html:not(.dark) [class*="bg-[#090b12]"],
+html.light [class*="bg-[#0c0e17]"],
+html:not(.dark) [class*="bg-[#0c0e17]"],
+html.light [class*="bg-[#10131d]"],
+html:not(.dark) [class*="bg-[#10131d]"],
+html.light [class*="bg-[#10131e]"],
+html:not(.dark) [class*="bg-[#10131e]"],
+html.light [class*="bg-[#111420]"],
+html:not(.dark) [class*="bg-[#111420]"],
+html.light [class*="bg-[#12151f]"],
+html:not(.dark) [class*="bg-[#12151f]"],
+html.light [class*="bg-[#121520]"],
+html:not(.dark) [class*="bg-[#121520]"],
+html.light [class*="bg-[#131724]"],
+html:not(.dark) [class*="bg-[#131724]"],
+html.light [class*="bg-[#141824]"],
+html:not(.dark) [class*="bg-[#141824]"],
+html.light [class*="bg-[#141826]"],
+html:not(.dark) [class*="bg-[#141826]"],
+html.light [class*="bg-[#151928]"],
+html:not(.dark) [class*="bg-[#151928]"],
+html.light [class*="bg-[#161a28]"],
+html:not(.dark) [class*="bg-[#161a28]"],
+html.light [class*="bg-[#181c28]"],
+html:not(.dark) [class*="bg-[#181c28]"],
+html.light [class*="bg-[#181c2b]"],
+html:not(.dark) [class*="bg-[#181c2b]"],
+html.light [class*="bg-[#1a1f30]"],
+html:not(.dark) [class*="bg-[#1a1f30]"] {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Subtle border replacement */
+html.light [class*="border-white/"],
+html:not(.dark) [class*="border-white/"],
+html.light [class*="border-[#262c40]"],
+html:not(.dark) [class*="border-[#262c40]"],
+html.light [class*="border-[#1e2436]"],
+html:not(.dark) [class*="border-[#1e2436]"] {
+  border-color: #e2e8f0 !important;
+}
+
+/* Headings and primary text */
+html.light h1:not([class*="gradient"]),
+html:not(.dark) h1:not([class*="gradient"]),
+html.light h2:not([class*="gradient"]),
+html:not(.dark) h2:not([class*="gradient"]),
+html.light h3:not([class*="gradient"]),
+html:not(.dark) h3:not([class*="gradient"]),
+html.light h4:not([class*="gradient"]),
+html:not(.dark) h4:not([class*="gradient"]) {
+  color: #0f172a !important;
+}
+
+/* General text classes — excluding buttons and colored badges */
+html.light :not(button):not(.badge):not([class*="bg-orange"]):not([class*="bg-amber"]):not([class*="gradient"]):not([class*="text-emerald"]):not([class*="text-rose"]):not([class*="text-cyan"]) > .text-white,
+html:not(.dark) :not(button):not(.badge):not([class*="bg-orange"]):not([class*="bg-amber"]):not([class*="gradient"]):not([class*="text-emerald"]):not([class*="text-rose"]):not([class*="text-cyan"]) > .text-white {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-200,
+html:not(.dark) .text-slate-200,
+html.light .text-slate-300,
+html:not(.dark) .text-slate-300 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-400,
+html:not(.dark) .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Form Inputs, Selects, and Textareas */
+html.light input,
+html:not(.dark) input,
+html.light select,
+html:not(.dark) select,
+html.light textarea,
+html:not(.dark) textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+html.light input::placeholder,
+html:not(.dark) input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Sidebar nav items */
+html.light aside button:not([class*="bg-orange"]),
+html:not(.dark) aside button:not([class*="bg-orange"]) {
+  color: #475569 !important;
+}
+html.light aside button:hover,
+html:not(.dark) aside button:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+/* Active navigation tab highlight */
+html.light aside [class*="bg-gradient-to-r"][class*="orange"],
+html:not(.dark) aside [class*="bg-gradient-to-r"][class*="orange"] {
+  background: #fff7ed !important;
+  border: 1px solid #fed7aa !important;
+  color: #c2410c !important;
+}
+html.light aside [class*="bg-gradient-to-r"][class*="orange"] * {
+  color: #c2410c !important;
+}
+
+/* Preserve logo and gradient CTA buttons */
+html.light .amber-gradient-btn,
+html:not(.dark) .amber-gradient-btn,
+html.light .amber-gradient-btn *,
+html:not(.dark) .amber-gradient-btn *,
+html.light button[data-testid="nav-new-deal-btn"],
+html:not(.dark) button[data-testid="nav-new-deal-btn"],
+html.light button[data-testid="nav-new-deal-btn"] *,
+html:not(.dark) button[data-testid="nav-new-deal-btn"] * {
+  color: #ffffff !important;
+}
+
+/* Preserving colored KPI metrics in light mode */
+html.light .text-emerald-400,
+html:not(.dark) .text-emerald-400 {
+  color: #059669 !important;
+}
+html.light .text-rose-400,
+html:not(.dark) .text-rose-400 {
+  color: #e11d48 !important;
+}
+html.light .text-cyan-300,
+html.light .text-cyan-400,
+html:not(.dark) .text-cyan-300,
+html:not(.dark) .text-cyan-400 {
+  color: #0284c7 !important;
+}
+html.light .text-orange-400,
+html:not(.dark) .text-orange-400 {
+  color: #ea580c !important;
+}
+html.light .text-amber-400,
+html:not(.dark) .text-amber-400 {
+  color: #d97706 !important;
+}
+html.light .text-purple-300,
+html.light .text-purple-400,
+html:not(.dark) .text-purple-300,
+html:not(.dark) .text-purple-400 {
+  color: #7c3aed !important;
+}
+
+/* Tables in Light Mode */
+html.light table,
+html:not(.dark) table {
+  color: #0f172a !important;
+}
+html.light thead,
+html:not(.dark) thead {
+  background-color: #f8fafc !important;
+}
+html.light th,
+html:not(.dark) th {
+  color: #475569 !important;
+  border-color: #e2e8f0 !important;
+}
+html.light td,
+html:not(.dark) td {
+  border-color: #f1f5f9 !important;
+}
+html.light tr:hover,
+html:not(.dark) tr:hover {
+  background-color: #f8fafc !important;
+}
+
+

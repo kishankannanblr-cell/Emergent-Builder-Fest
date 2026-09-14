@@ -345,7 +345,7 @@ Prepared via DealCFO Intelligence Cockpit
                   onOpenDCF(deal);
                   onClose();
                 }}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs gap-1.5 shadow-sm shadow-emerald-900/40"
+                className="amber-gradient-btn font-semibold text-xs gap-1.5"
               >
                 <TrendingUp className="w-3.5 h-3.5" />
                 <span>Simulate DCF & Deal Terms</span>

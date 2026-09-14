@@ -4,33 +4,35 @@ import {
   Sun, 
   Moon, 
   RefreshCw, 
-  TrendingUp, 
   Search,
   Briefcase,
-  Heart
+  Heart,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
 interface NavbarProps {
   onNewDealClick: () => void;
   onResetSeed: () => void;
   activeTab: string;
-  setActiveTab: (tab: string) => void;
+  setActiveTab?: (tab: string) => void;
   searchTerm: string;
   setSearchTerm: (s: string) => void;
   isSeeding?: boolean;
+  onOpenAICopilot?: () => void;
+  onOpenAbout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onNewDealClick,
   onResetSeed,
   activeTab,
-  setActiveTab,
   searchTerm,
   setSearchTerm,
-  isSeeding = false
+  isSeeding = false,
+  onOpenAICopilot,
+  onOpenAbout
 }) => {
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
@@ -45,9 +47,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     if (isDark) {
       document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
       localStorage.setItem("dealCfoTheme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
       localStorage.setItem("dealCfoTheme", "light");
     }
   }, [isDark]);
@@ -56,72 +60,101 @@ export const Navbar: React.FC<NavbarProps> = ({
     setIsDark(prev => !prev);
   };
 
-  const navTabs = [
-    { id: "overview", label: "Executive Overview" },
-    { id: "pipeline", label: "Deal Pipeline" },
-    { id: "valuation", label: "Valuation & Deal Structurer" },
-    { id: "runway", label: "Cash & Runway" },
-    { id: "ebitda", label: "EBITDA Adjustments" },
-    { id: "deals", label: "All Deals Database" },
-  ];
+  const getPageTitle = (tab: string) => {
+    switch(tab) {
+      case "overview": return { title: "Executive Dashboard", section: "Main" };
+      case "pipeline": return { title: "Deal Pipeline & Stage Gates", section: "Main" };
+      case "deals": return { title: "Deal Database & Directory", section: "Main" };
+      case "valuation-dcf":
+      case "valuation": return { title: "DCF Valuation & Sensitivity Analysis", section: "Valuation & Analytics" };
+      case "valuation-shark": return { title: "Mr. Wonderful Deal Structurer", section: "Shark Mode" };
+      case "runway": return { title: "Cash Runway & Burn Horizon", section: "Valuation & Analytics" };
+      case "ebitda": return { title: "Quality of Earnings (QoE) Bridge", section: "Valuation & Analytics" };
+      case "about": return { title: "About DealCFO & Author Kishan Kannan", section: "Platform & Builder" };
+      default: return { title: "Executive Dashboard", section: "Main" };
+    }
+  };
+
+  const currentMeta = getPageTitle(activeTab);
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-background/95 backdrop-blur-md transition-colors">
-      {/* Top Utility Bar */}
-      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        {/* Brand Logo & Fund Selector */}
-        <div className="flex items-center gap-4">
-          <div 
-            onClick={() => setActiveTab("overview")}
-            className="flex items-center gap-2.5 cursor-pointer group"
-            data-testid="brand-logo"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
-              <TrendingUp className="w-5 h-5" />
+    <header className="sticky top-0 z-30 w-full border-b border-white/[0.08] bg-[#0c0e17]/95 backdrop-blur-md transition-colors">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8 w-full">
+        {/* Left: Active View Breadcrumb & Fund Selector */}
+        <div className="flex items-center gap-4 flex-shrink-0">
+          <div className="flex-shrink-0">
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
+              <span>DealCFO</span>
+              <span>/</span>
+              <span className="text-orange-400 font-semibold">{currentMeta.section}</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500 bg-clip-text text-transparent">
-                  DealCFO
-                </span>
-                <Badge variant="outline" className="hidden sm:inline-flex text-[10px] px-1.5 py-0 border-emerald-500/30 text-emerald-400 font-mono">
-                  v2.4 Pro
-                </Badge>
-              </div>
-              <p className="text-[11px] text-muted-foreground hidden sm:block font-medium">
-                M&A Deal & Valuation Intelligence
-              </p>
-            </div>
+            <h1 className="text-base sm:text-lg font-bold text-white tracking-tight leading-none mt-0.5 whitespace-nowrap">
+              {currentMeta.title}
+            </h1>
           </div>
 
-          <div className="hidden lg:flex items-center gap-2 pl-4 border-l border-border/60">
-            <Briefcase className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className="hidden 2xl:flex items-center gap-2 pl-4 border-l border-slate-200 dark:border-white/[0.08] flex-shrink-0">
+            <Briefcase className="w-3.5 h-3.5 text-slate-400" />
             <select
               data-testid="workspace-selector"
               value={workspace}
               onChange={(e) => setWorkspace(e.target.value)}
-              className="text-xs bg-muted/60 hover:bg-muted border border-border/60 rounded-md px-2.5 py-1 text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              className="text-xs bg-[#141824] hover:bg-[#1a1f30] border border-white/[0.08] rounded-md px-2.5 py-1 text-slate-200 font-medium focus:outline-none focus:ring-1 focus:ring-orange-500 cursor-pointer"
             >
-              <option value="Mid-Market Growth Fund IV ($250M)">Mid-Market Growth Fund IV ($250M)</option>
+              <option value="Mid-Market Growth Fund IV ($250M)">Growth Fund IV ($250M)</option>
               <option value="Global Tech Buyout Fund II ($500M)">Global Tech Buyout Fund II ($500M)</option>
               <option value="Strategic Carve-Outs SPV ($120M)">Strategic Carve-Outs SPV ($120M)</option>
             </select>
           </div>
         </div>
 
-        {/* Global Search & Action Buttons */}
-        <div className="flex items-center gap-3">
-          <div className="relative hidden md:block w-56 lg:w-72">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        {/* Right: Global Search & Action Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="relative hidden md:block w-36 lg:w-44">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <Input
               data-testid="global-search-input"
               type="text"
-              placeholder="Search deals, targets, partners..."
+              placeholder="Search deals... (⌘K)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9 text-xs bg-muted/40 border-border/60 focus-visible:ring-emerald-500"
+              className="pl-9 pr-8 h-9 text-xs bg-[#141824] border-white/[0.08] focus-visible:ring-orange-500 text-slate-200 placeholder:text-slate-500"
             />
+            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono text-slate-500 bg-white/5 border border-white/10 px-1 py-0.5 rounded">
+              ⌘K
+            </kbd>
           </div>
+
+          {/* Prominent Global "Ask DealCFO AI" Button */}
+          <Button
+            data-testid="nav-ask-ai-btn"
+            onClick={onOpenAICopilot}
+            variant="outline"
+            size="sm"
+            className="h-9 gap-1.5 px-3 rounded-lg bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-orange-500/15 hover:from-orange-500/25 hover:to-amber-500/25 border border-orange-500/30 text-orange-300 hover:text-white font-bold text-xs transition-all shadow-sm hover:scale-[1.02] active:scale-[0.98]"
+            title="Open DealCFO AI Copilot (Ctrl + J)"
+          >
+            <span className="w-2 h-2 rounded-full bg-orange-400 animate-ping" />
+            <span>✨ Ask AI</span>
+            <kbd className="hidden sm:inline-block ml-1 text-[10px] font-mono text-orange-400 bg-orange-500/20 px-1 py-0.2 rounded border border-orange-500/30">
+              Ctrl+J
+            </kbd>
+          </Button>
+
+          {/* About DealCFO & Author Button */}
+          {onOpenAbout && (
+            <Button
+              data-testid="nav-about-btn"
+              onClick={onOpenAbout}
+              variant="outline"
+              size="sm"
+              className="hidden lg:inline-flex h-9 gap-1.5 px-2.5 rounded-lg bg-[#141824] hover:bg-[#1a1f30] border-white/[0.08] text-slate-300 hover:text-white font-semibold text-xs transition-all"
+              title="About DealCFO & Author Kishan Kannan"
+            >
+              <Info className="w-3.5 h-3.5 text-orange-400" />
+              <span>About</span>
+            </Button>
+          )}
 
           {/* Persistent Vote CTA Pill */}
           <a
@@ -133,8 +166,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Vote for DealCFO on Emergent Showcase"
           >
             <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 animate-pulse" />
-            <span className="hidden sm:inline">Vote on Showcase</span>
-            <span className="sm:hidden">Vote</span>
+            <span className="hidden sm:inline">Vote</span>
           </a>
 
           {/* Reset / Reseed Demo Data */}
@@ -144,11 +176,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             size="sm"
             onClick={onResetSeed}
             disabled={isSeeding}
-            className="h-9 px-2.5 text-xs border-border/60 hover:bg-muted font-medium text-muted-foreground hover:text-foreground"
+            className="h-9 px-2.5 text-xs bg-[#141824] border-white/[0.08] hover:bg-[#1a1f30] font-medium text-slate-400 hover:text-white"
             title="Reset to fresh demo deals"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isSeeding ? "animate-spin text-emerald-400" : ""}`} />
-            <span className="hidden xl:inline ml-1.5">{isSeeding ? "Seeding..." : "Reset Data"}</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${isSeeding ? "animate-spin text-orange-400" : ""}`} />
+            <span className="hidden 2xl:inline ml-1.5">{isSeeding ? "Resetting..." : "Reset"}</span>
           </Button>
 
           {/* Theme Toggle */}
@@ -157,13 +189,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             variant="outline"
             size="icon"
             onClick={toggleTheme}
-            className="h-9 w-9 border-border/60 text-muted-foreground hover:text-foreground"
+            className="h-9 w-9 bg-[#141824] border-white/[0.08] text-slate-400 hover:text-white hover:bg-[#1a1f30]"
             title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
           >
             {isDark ? (
               <Sun className="w-4 h-4 text-amber-400" />
             ) : (
-              <Moon className="w-4 h-4 text-slate-700" />
+              <Moon className="w-4 h-4 text-slate-400" />
             )}
           </Button>
 
@@ -172,37 +204,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             data-testid="nav-new-deal-btn"
             onClick={onNewDealClick}
             size="sm"
-            className="h-9 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold shadow-sm shadow-emerald-500/30"
+            className="h-9 gap-1.5 amber-gradient-btn font-semibold shadow-md shadow-orange-500/25 transition-transform active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">New Deal Intake</span>
-            <span className="sm:hidden">Intake</span>
+            <span className="hidden sm:inline">+ New Deal</span>
           </Button>
-        </div>
-      </div>
-
-      {/* Primary Navigation Tabs */}
-      <div className="border-t border-border/40 bg-muted/20">
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto py-1">
-          {navTabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                data-testid={`nav-tab-${tab.id}`}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3.5 py-2 text-xs font-semibold rounded-md whitespace-nowrap transition-all duration-150 ${
-                  isActive
-                    ? "bg-emerald-500/15 text-emerald-400 dark:text-emerald-400 border border-emerald-500/30 shadow-sm"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
         </div>
       </div>
     </header>
   );
 };
+

@@ -356,7 +356,7 @@ export const DealIntakeModal: React.FC<DealIntakeModalProps> = ({
               type="submit"
               size="sm"
               disabled={isSubmitting}
-              className="text-xs bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold"
+              className="text-xs amber-gradient-btn font-semibold"
             >
               {isSubmitting ? "Saving..." : isEdit ? "Update Deal" : "Create Deal"}
             </Button>

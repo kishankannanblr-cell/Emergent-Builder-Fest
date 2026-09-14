@@ -79,7 +79,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
               onClick={() => setActiveFilterSector(sec)}
               className={`px-2.5 py-1 text-xs rounded-md transition-all font-medium ${
                 activeFilterSector === sec
-                  ? "bg-emerald-500 text-slate-950 font-bold shadow-sm"
+                  ? "amber-gradient-btn font-bold shadow-sm"
                   : "bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >
@@ -115,7 +115,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                     ({stageDeals.length})
                   </span>
                 </div>
-                <span className="text-xs font-mono font-semibold text-emerald-400">
+                <span className="text-xs font-mono font-semibold text-amber-400">
                   ${stageEV.toFixed(1)}M
                 </span>
               </div>
@@ -135,14 +135,14 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                       <Card
                         key={deal.id}
                         data-testid={`deal-card-${deal.id}`}
-                        className="bg-card border-border/80 hover:border-emerald-500/50 hover:shadow-md transition-all duration-150 cursor-pointer group"
+                        className="obsidian-card obsidian-card-hover cursor-pointer group"
                         onClick={() => onSelectDeal(deal)}
                       >
                         <CardContent className="p-3.5 space-y-2.5">
                           {/* Target & Sector */}
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1">
-                              <h4 className="text-sm font-bold tracking-tight text-foreground group-hover:text-emerald-400 transition-colors line-clamp-1">
+                              <h4 className="text-sm font-bold tracking-tight text-foreground group-hover:text-amber-400 transition-colors line-clamp-1">
                                 {deal.name}
                               </h4>
                               <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
@@ -165,7 +165,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                             </div>
                             <div>
                               <span className="text-[10px] text-muted-foreground block">EV / EBITDA</span>
-                              <span className="font-mono font-bold text-emerald-400">
+                              <span className="font-mono font-bold text-amber-400">
                                 {deal.ebitda_multiple > 0 ? `${deal.ebitda_multiple.toFixed(1)}x` : "N/A"}
                               </span>
                             </div>
@@ -191,7 +191,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                             </div>
                             <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
                               <div
-                                className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
+                                className="bg-gradient-to-r from-amber-500 to-orange-500 h-1.5 rounded-full transition-all duration-300 shadow-sm shadow-orange-500/20"
                                 style={{ width: `${deal.probability_pct}%` }}
                               />
                             </div>
@@ -221,7 +221,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                                   variant="outline"
                                   size="xs"
                                   onClick={() => onStageChange(deal.id, nextStage)}
-                                  className="h-6 text-[11px] px-2 gap-1 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+                                  className="h-6 text-[11px] px-2 gap-1 border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
                                   title={`Advance to ${nextStage}`}
                                 >
                                   <span>Advance</span>
@@ -248,7 +248,7 @@ export const DealPipeline: React.FC<DealPipelineProps> = ({
                                 variant="ghost"
                                 size="icon-xs"
                                 onClick={() => onOpenDCF(deal)}
-                                className="h-6 w-6 text-muted-foreground hover:text-emerald-400"
+                                className="h-6 w-6 text-muted-foreground hover:text-orange-400"
                                 title="Analyze in DCF Model"
                               >
                                 <Calculator className="w-3.5 h-3.5" />

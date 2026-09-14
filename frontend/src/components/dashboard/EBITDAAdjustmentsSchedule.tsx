@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { 
   FileSpreadsheet, 
   Plus, 
-  Trash2 
+  Trash2,
+  RotateCcw
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,69 @@ import type { EBITDAAdjustment, EBITDAAdjustmentCreate } from "@/lib/types";
 import { apiGet, apiPost, apiDelete } from "@/lib/api";
 import { toast } from "sonner";
 
+export const DEFAULT_QOE_ADJUSTMENTS: EBITDAAdjustment[] = [
+  {
+    id: "qoe-1",
+    deal_id: "demo-1",
+    name: "Founder / Executive Compensation Normalization",
+    category: "Owner Compensation",
+    amount: 0.45,
+    adjustment_type: "add_back",
+    notes: "Current owner draws $750k salary. Replacement market-rate C-suite compensation benchmarked at $300k ($450k add-back).",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "qoe-2",
+    deal_id: "demo-1",
+    name: "Non-Recurring Carve-Out Legal & Audit Advisory",
+    category: "One-Time Legal/Advisory",
+    amount: 0.32,
+    adjustment_type: "add_back",
+    notes: "One-off legal restructuring and EY quality-of-earnings fees from corporate spin-off.",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "qoe-3",
+    deal_id: "demo-1",
+    name: "Legacy Data Center to AWS Cloud Migration Overlap",
+    category: "IT & Cloud Migration",
+    amount: 0.28,
+    adjustment_type: "add_back",
+    notes: "Temporary double-run server costs during 8-month cloud migration completed in Q1.",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "qoe-4",
+    deal_id: "demo-1",
+    name: "Restructuring & Severance Expenses (Non-Core)",
+    category: "Restructuring & Severance",
+    amount: 0.19,
+    adjustment_type: "add_back",
+    notes: "One-time severance payments associated with headcount rationalization in non-core unit.",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "qoe-5",
+    deal_id: "demo-1",
+    name: "Non-Operating Real Estate Sublease Income",
+    category: "Non-Operating Income",
+    amount: 0.12,
+    adjustment_type: "deduction",
+    notes: "Sublease income from vacant warehouse facility not transferring with operating assets.",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "qoe-6",
+    deal_id: "demo-1",
+    name: "Procurement & SaaS Vendor Consolidation Synergies",
+    category: "Pro-Forma Synergies",
+    amount: 0.60,
+    adjustment_type: "add_back",
+    notes: "Identified post-close vendor consolidation and enterprise volume software license discounts.",
+    created_at: new Date().toISOString(),
+  },
+];
+
 interface EBITDAAdjustmentsScheduleProps {
   initialAdjustments?: EBITDAAdjustment[];
 }
@@ -28,7 +92,21 @@ interface EBITDAAdjustmentsScheduleProps {
 export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps> = ({
   initialAdjustments = [],
 }) => {
-  const [adjustments, setAdjustments] = useState<EBITDAAdjustment[]>(initialAdjustments);
+  const [adjustments, setAdjustments] = useState<EBITDAAdjustment[]>(() => {
+    if (initialAdjustments && initialAdjustments.length > 0) return initialAdjustments;
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("dealCfoQoEAdjustments");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {
+        // use fallback
+      }
+    }
+    return DEFAULT_QOE_ADJUSTMENTS;
+  });
   const [reportedEbitda, setReportedEbitda] = useState<number>(4.20);
   const [valuationMultiple, setValuationMultiple] = useState<number>(11.5);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,15 +121,28 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
   const fetchAdjustments = async () => {
     try {
       const res = await apiGet<EBITDAAdjustment[]>("/financials/ebitda-adjustments");
-      setAdjustments(res);
+      if (res && Array.isArray(res) && res.length > 0) {
+        setAdjustments(res);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("dealCfoQoEAdjustments", JSON.stringify(res));
+        }
+      }
     } catch {
-      // Fallback
+      // Retain fallback adjustments in client/preview mode
     }
   };
 
   useEffect(() => {
     fetchAdjustments();
   }, []);
+
+  const handleResetToStandard = () => {
+    setAdjustments(DEFAULT_QOE_ADJUSTMENTS);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dealCfoQoEAdjustments", JSON.stringify(DEFAULT_QOE_ADJUSTMENTS));
+    }
+    toast.success("Reset QoE Schedule to 6 Standard Institutional Adjustments");
+  };
 
   const handleAddAdjustment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +153,13 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
 
     try {
       const created = await apiPost<EBITDAAdjustment>("/financials/ebitda-adjustments", newAdj);
-      setAdjustments((prev) => [...prev, created]);
+      setAdjustments((prev) => {
+        const updated = [...prev, created];
+        if (typeof window !== "undefined") {
+          localStorage.setItem("dealCfoQoEAdjustments", JSON.stringify(updated));
+        }
+        return updated;
+      });
       toast.success("EBITDA Adjustment added to QoE schedule");
       setIsModalOpen(false);
       setNewAdj({
@@ -72,19 +169,51 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
         adjustment_type: "add_back",
         notes: "",
       });
-    } catch (err: any) {
-      toast.error("Failed to add adjustment: " + (err.message || "Error"));
+    } catch {
+      // Local fallback creation
+      const localCreated: EBITDAAdjustment = {
+        id: `qoe-${Date.now()}`,
+        deal_id: "demo-1",
+        name: newAdj.name,
+        category: newAdj.category,
+        amount: Number(newAdj.amount) || 0,
+        adjustment_type: newAdj.adjustment_type,
+        notes: newAdj.notes || "",
+        created_at: new Date().toISOString(),
+      };
+      setAdjustments((prev) => {
+        const updated = [...prev, localCreated];
+        if (typeof window !== "undefined") {
+          localStorage.setItem("dealCfoQoEAdjustments", JSON.stringify(updated));
+        }
+        return updated;
+      });
+      toast.success("EBITDA Adjustment added to QoE schedule");
+      setIsModalOpen(false);
+      setNewAdj({
+        name: "",
+        category: "Owner Compensation",
+        amount: 0.35,
+        adjustment_type: "add_back",
+        notes: "",
+      });
     }
   };
 
   const handleDeleteAdjustment = async (id: string) => {
     try {
       await apiDelete(`/financials/ebitda-adjustments/${id}`);
-      setAdjustments((prev) => prev.filter((a) => a.id !== id));
-      toast.success("Adjustment removed from schedule");
     } catch {
-      toast.error("Failed to delete adjustment");
+      // Continue with local delete
     }
+    setAdjustments((prev) => {
+      const updated = prev.filter((a) => a.id !== id);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("dealCfoQoEAdjustments", JSON.stringify(updated));
+      }
+      return updated;
+    });
+    toast.success("Adjustment removed from schedule");
   };
 
   // Computations
@@ -116,20 +245,33 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
           </p>
         </div>
 
-        <Button
-          data-testid="btn-open-adjustment-modal"
-          onClick={() => setIsModalOpen(true)}
-          size="sm"
-          className="h-9 gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add QoE Line Item</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetToStandard}
+            className="h-9 gap-1.5 text-xs text-muted-foreground hover:text-foreground border-border/80"
+            title="Reset to 6 standard institutional QoE adjustments"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Reset Standard Bridge</span>
+          </Button>
+
+          <Button
+            data-testid="btn-open-adjustment-modal"
+            onClick={() => setIsModalOpen(true)}
+            size="sm"
+            className="h-9 gap-1.5 amber-gradient-btn font-semibold shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add QoE Line Item</span>
+          </Button>
+        </div>
       </div>
 
       {/* EBITDA Bridge Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        <Card className="bg-card/60 border-border p-3.5">
+        <Card className="obsidian-card p-3.5">
           <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold block">
             Reported LTM EBITDA
           </span>
@@ -182,24 +324,24 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
           </p>
         </Card>
 
-        <Card className="bg-emerald-500/20 border-emerald-500/40 p-3.5">
-          <span className="text-[10px] text-emerald-300 uppercase tracking-wider font-semibold block">
+        <Card className="bg-orange-500/10 border-orange-500/30 p-3.5">
+          <span className="text-[10px] text-orange-400 uppercase tracking-wider font-semibold block">
             EV Impact @ {valuationMultiple}x
           </span>
           <div 
             data-testid="qoe-ev-delta-display"
             className="mt-1 flex items-baseline gap-1.5"
           >
-            <span className="text-2xl font-extrabold font-mono text-emerald-300">
+            <span className="text-2xl font-extrabold font-mono text-orange-400">
               +${evDelta.toFixed(2)}M
             </span>
           </div>
-          <p className="text-[10px] text-emerald-400/90 font-mono mt-1">Total EV: ${adjustedEV.toFixed(1)}M</p>
+          <p className="text-[10px] text-orange-400/90 font-mono mt-1">Total EV: ${adjustedEV.toFixed(1)}M</p>
         </Card>
       </div>
 
       {/* Baseline Controls */}
-      <div className="flex flex-wrap items-center gap-4 bg-muted/20 border border-border/80 p-3 rounded-lg text-xs">
+      <div className="flex flex-wrap items-center gap-4 obsidian-card p-3 rounded-lg text-xs">
         <div className="flex items-center gap-2">
           <Label htmlFor="base_ebitda" className="text-muted-foreground font-medium">
             Baseline LTM EBITDA ($M):
@@ -232,7 +374,7 @@ export const EBITDAAdjustmentsSchedule: React.FC<EBITDAAdjustmentsScheduleProps>
       </div>
 
       {/* Adjustments Table */}
-      <Card className="border-border/80 bg-card/60">
+      <Card className="obsidian-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
             <span>Schedule of Adjustments & Normalization Line Items</span>

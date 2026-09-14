@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Navbar } from "@/components/layout/Navbar";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { VoteBanner } from "@/components/layout/VoteBanner";
-import { KPICards } from "@/components/dashboard/KPICards";
 import { ExecutiveOverview } from "@/components/dashboard/ExecutiveOverview";
 import { DealPipeline } from "@/components/dashboard/DealPipeline";
 import { ValuationDCFEstimator } from "@/components/dashboard/ValuationDCFEstimator";
@@ -12,6 +12,9 @@ import { DealsTable } from "@/components/dashboard/DealsTable";
 import { DealIntakeModal } from "@/components/dashboard/DealIntakeModal";
 import { DealDetailModal } from "@/components/dashboard/DealDetailModal";
 import { AIInvestmentMemoModal } from "@/components/dashboard/AIInvestmentMemoModal";
+import { AboutModal } from "@/components/dashboard/AboutModal";
+import { AboutPage } from "@/components/dashboard/AboutPage";
+import { GlobalAICopilotDrawer } from "@/components/dashboard/GlobalAICopilotDrawer";
 import { Toaster } from "@/components/ui/sonner";
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/api";
 import type { Deal, DealCreate, DealUpdate, FinancialOverview, CashRunwayResponse } from "@/lib/types";
@@ -225,9 +228,23 @@ export default function Home() {
   const [memoDeal, setMemoDeal] = useState<Deal | null>(null);
   const [isMemoOpen, setIsMemoOpen] = useState<boolean>(false);
   const [isSeeding, setIsSeeding] = useState<boolean>(false);
+  const [isAICopilotOpen, setIsAICopilotOpen] = useState<boolean>(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState<boolean>(false);
+
+  // Global keyboard shortcut: Ctrl+J / Cmd+J to toggle AI Copilot
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "j") {
+        e.preventDefault();
+        setIsAICopilotOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
 
   // Queries
-  const { data: dealsData, isLoading: isDealsLoading } = useQuery<Deal[]>({
+  const { data: dealsData } = useQuery<Deal[]>({
     queryKey: ["deals"],
     queryFn: () => apiGet<Deal[]>("/deals"),
   });
@@ -343,130 +360,175 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
+    <div className="min-h-screen bg-[#f6f8fb] dark:bg-[#090b12] text-foreground flex flex-col font-sans obsidian-canvas selection:bg-orange-500/30">
       <Toaster position="top-right" richColors />
 
       {/* Emergent Builder Fest Showcase Voting Banner */}
       <VoteBanner />
 
-      {/* Top Navigation */}
-      <Navbar
-        onNewDealClick={() => {
-          setDealToEdit(null);
-          setIsIntakeOpen(true);
-        }}
-        onResetSeed={handleResetSeed}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        isSeeding={isSeeding}
-      />
+      {/* 2-Column Responsive Application Shell matching Screenshot 2026-09-13 200703.png */}
+      <div className="flex flex-1 min-h-0">
+        {/* Left Navigation Sidebar */}
+        <Sidebar
+          activeTab={activeTab === "valuation" ? `valuation-${valuationSubTab}` : activeTab}
+          onNavigate={(tab, subtab) => {
+            if (tab === "valuation-dcf") {
+              setValuationSubTab("dcf");
+              setActiveTab("valuation");
+            } else if (tab === "valuation-shark") {
+              setValuationSubTab("shark");
+              setActiveTab("valuation");
+            } else {
+              if (subtab === "dcf" || subtab === "shark") setValuationSubTab(subtab);
+              setActiveTab(tab);
+            }
+          }}
+          onNewDealClick={() => {
+            setDealToEdit(null);
+            setIsIntakeOpen(true);
+          }}
+          onOpenAICopilot={() => setIsAICopilotOpen(true)}
+          onOpenAbout={() => setIsAboutModalOpen(true)}
+        />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Executive KPI Cards always visible at top */}
-        <KPICards overview={overviewData} isLoading={isDealsLoading} />
+        {/* Right Canvas / Main Content Area */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto overflow-x-hidden">
+          {/* Top Command Bar */}
+          <Navbar
+            onNewDealClick={() => {
+              setDealToEdit(null);
+              setIsIntakeOpen(true);
+            }}
+            onResetSeed={handleResetSeed}
+            activeTab={activeTab === "valuation" ? `valuation-${valuationSubTab}` : activeTab}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            isSeeding={isSeeding}
+            onOpenAICopilot={() => setIsAICopilotOpen(true)}
+            onOpenAbout={() => setActiveTab("about")}
+          />
 
-        {/* Tab Content Panes */}
-        <div className="pt-2">
-          {activeTab === "overview" && (
-            <ExecutiveOverview
-              overview={overviewData}
-              deals={deals}
-              onSelectDeal={(d) => setSelectedDeal(d)}
-              onOpenDCF={handleOpenDCF}
-              onNavigateTab={(t) => {
-                if (t === "valuation-shark") {
-                  setValuationSubTab("shark");
-                  setActiveTab("valuation");
-                } else {
-                  if (t === "valuation") setValuationSubTab("dcf");
-                  setActiveTab(t);
-                }
-              }}
-              onNewDealClick={() => {
-                setDealToEdit(null);
-                setIsIntakeOpen(true);
-              }}
-              onGenerateMemo={handleOpenMemo}
-              onLaunchSharkTank={() => {
-                setValuationSubTab("shark");
-                setActiveTab("valuation");
-              }}
-            />
-          )}
-
-          {activeTab === "pipeline" && (
-            <div className="space-y-4">
-              <DealPipeline
-                deals={deals}
-                onStageChange={handleStageChange}
-                onSelectDeal={(d) => setSelectedDeal(d)}
-                onOpenDCF={handleOpenDCF}
-                onDeleteDeal={handleDeleteDeal}
-                onGenerateMemo={handleOpenMemo}
-              />
-            </div>
-          )}
-
-          {activeTab === "valuation" && (
-            <div className="space-y-4">
-              <ValuationDCFEstimator
-                deals={deals}
-                initialDeal={dcfSelectedDeal}
-                initialSubTab={valuationSubTab}
-              />
-            </div>
-          )}
-
-          {activeTab === "runway" && (
-            <div className="space-y-4">
-              <CashRunwayAnalytics initialRunway={runwayData} />
-            </div>
-          )}
-
-          {activeTab === "ebitda" && (
-            <div className="space-y-4">
-              <EBITDAAdjustmentsSchedule />
-            </div>
-          )}
-
-          {activeTab === "deals" && (
-            <div className="space-y-4">
-              <DealsTable
+          {/* Main Content Workspace */}
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto space-y-6">
+            {activeTab === "overview" && (
+              <ExecutiveOverview
+                overview={overviewData}
                 deals={deals}
                 onSelectDeal={(d) => setSelectedDeal(d)}
-                onEditDeal={handleEditDeal}
-                onDeleteDeal={handleDeleteDeal}
                 onOpenDCF={handleOpenDCF}
-                onStageChange={handleStageChange}
+                onNavigateTab={(t) => {
+                  if (t === "valuation-shark") {
+                    setValuationSubTab("shark");
+                    setActiveTab("valuation");
+                  } else {
+                    if (t === "valuation") setValuationSubTab("dcf");
+                    setActiveTab(t);
+                  }
+                }}
                 onNewDealClick={() => {
                   setDealToEdit(null);
                   setIsIntakeOpen(true);
                 }}
                 onGenerateMemo={handleOpenMemo}
+                onLaunchSharkTank={() => {
+                  setValuationSubTab("shark");
+                  setActiveTab("valuation");
+                }}
+                onOpenAICopilot={() => setIsAICopilotOpen(true)}
+                onOpenAboutModal={() => setIsAboutModalOpen(true)}
               />
-            </div>
-          )}
-        </div>
-      </main>
+            )}
 
-      {/* Footer */}
-      <footer className="border-t border-border/40 py-5 bg-muted/10 text-xs text-muted-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-foreground">DealCFO</span>
-            <span>•</span>
-            <span>M&A Valuation & CFO Intelligence Engine</span>
-          </div>
-          <div className="flex items-center gap-4 text-[11px] font-mono">
-            <span>Server: FastAPI v0.115 / Python 3.11</span>
-            <span>•</span>
-            <span>Client: React 19 / Vite</span>
-          </div>
+            {activeTab === "pipeline" && (
+              <div className="space-y-4">
+                <DealPipeline
+                  deals={deals}
+                  onStageChange={handleStageChange}
+                  onSelectDeal={(d) => setSelectedDeal(d)}
+                  onOpenDCF={handleOpenDCF}
+                  onDeleteDeal={handleDeleteDeal}
+                  onGenerateMemo={handleOpenMemo}
+                />
+              </div>
+            )}
+
+            {activeTab === "valuation" && (
+              <div className="space-y-4">
+                <ValuationDCFEstimator
+                  deals={deals}
+                  initialDeal={dcfSelectedDeal}
+                  initialSubTab={valuationSubTab}
+                />
+              </div>
+            )}
+
+            {activeTab === "runway" && (
+              <div className="space-y-4">
+                <CashRunwayAnalytics initialRunway={runwayData} />
+              </div>
+            )}
+
+            {activeTab === "ebitda" && (
+              <div className="space-y-4">
+                <EBITDAAdjustmentsSchedule />
+              </div>
+            )}
+
+            {activeTab === "deals" && (
+              <div className="space-y-4">
+                <DealsTable
+                  deals={deals}
+                  onSelectDeal={(d) => setSelectedDeal(d)}
+                  onEditDeal={handleEditDeal}
+                  onDeleteDeal={handleDeleteDeal}
+                  onOpenDCF={handleOpenDCF}
+                  onStageChange={handleStageChange}
+                  onNewDealClick={() => {
+                    setDealToEdit(null);
+                    setIsIntakeOpen(true);
+                  }}
+                  onGenerateMemo={handleOpenMemo}
+                />
+              </div>
+            )}
+
+            {activeTab === "about" && (
+              <AboutPage
+                onNavigateTab={(t, s) => {
+                  if (t === "valuation-shark" || s === "shark") {
+                    setValuationSubTab("shark");
+                    setActiveTab("valuation");
+                  } else if (t === "valuation-dcf" || s === "dcf") {
+                    setValuationSubTab("dcf");
+                    setActiveTab("valuation");
+                  } else {
+                    setActiveTab(t);
+                  }
+                }}
+                onOpenAICopilot={() => setIsAICopilotOpen(true)}
+              />
+            )}
+          </main>
+
+          {/* Institutional Footer */}
+          <footer className="border-t border-slate-200 dark:border-white/[0.08] py-4 px-6 bg-white dark:bg-[#090b12] text-xs text-slate-500 transition-colors">
+            <div className="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-slate-700 dark:text-slate-300">DealCFO</span>
+                <span>•</span>
+                <span>Institutional M&A Valuation & CFO Intelligence Engine</span>
+              </div>
+              <div className="flex items-center gap-4 text-[11px] font-mono text-slate-500">
+                <span>FastAPI / Python 3.11</span>
+                <span>•</span>
+                <span>React 19 / Vite</span>
+                <span>•</span>
+                <span>Obsidian UI v3.0</span>
+              </div>
+            </div>
+          </footer>
         </div>
-      </footer>
+      </div>
 
       {/* Deal Intake & Edit Modal */}
       <DealIntakeModal
@@ -505,6 +567,50 @@ export default function Home() {
           setMemoDeal(null);
         }}
         onOpenDCF={handleOpenDCF}
+      />
+
+      {/* Global Google Gemini AI Copilot Drawer (Ctrl + J) with Target Deal Dropdown */}
+      <GlobalAICopilotDrawer
+        isOpen={isAICopilotOpen}
+        onClose={() => setIsAICopilotOpen(false)}
+        activeDeal={selectedDeal || dcfSelectedDeal || deals[0]}
+        deals={deals}
+        activeTab={activeTab}
+        onNavigateTab={(tab, subtab) => {
+          if (subtab === "shark") {
+            setValuationSubTab("shark");
+            setActiveTab("valuation");
+          } else if (subtab === "dcf") {
+            setValuationSubTab("dcf");
+            setActiveTab("valuation");
+          } else {
+            setActiveTab(tab);
+          }
+        }}
+        onApplyWacc={(wacc) => {
+          toast.success(`Calibrated WACC (${wacc}%) loaded into Valuation Model`);
+          setActiveTab("valuation");
+        }}
+        onApplyMultiple={(mult) => {
+          toast.success(`Exit Multiple (${mult}x) loaded into DCF Model`);
+          setActiveTab("valuation");
+        }}
+        onOpenMemo={handleOpenMemo}
+      />
+
+      {/* About DealCFO & Author Modal */}
+      <AboutModal
+        isOpen={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
+        onLaunchSharkTank={() => {
+          setValuationSubTab("shark");
+          setActiveTab("valuation");
+        }}
+        onLaunchDCF={() => {
+          setValuationSubTab("dcf");
+          setActiveTab("valuation");
+        }}
+        onOpenAICopilot={() => setIsAICopilotOpen(true)}
       />
     </div>
   );

@@ -22,6 +22,100 @@ import {
 } from "recharts";
 import type { Deal, MrWonderfulCritiqueResponse } from "@/lib/types";
 import { apiPost } from "@/lib/api";
+import { toast } from "sonner";
+
+export function evaluateKevinStructure(
+  investmentAmount: number,
+  royaltyPct: number,
+  paybackCapMult: number,
+  residualEquityPct: number,
+  deal: Partial<Deal> & { name: string; revenue: number; ebitda: number; target_company?: string; enterprise_value?: number },
+  calc: {
+    monthsToPayback: number;
+    paybackYears: string;
+    irrPct: string;
+    annualRoyaltyYear1: string;
+    royaltyCoverageEbitda: string;
+    founderDilutionSaved: string;
+  }
+): MrWonderfulCritiqueResponse {
+  const irr = parseFloat(calc.irrPct) || 0;
+  const months = calc.monthsToPayback;
+  const ebitdaCoverage = parseFloat(calc.royaltyCoverageEbitda) || 0;
+  const totalCapAmount = (investmentAmount * paybackCapMult).toFixed(1);
+
+  // Scenario 1: EBITDA Choke Warning (Royalty takes > 45% of EBITDA)
+  if (ebitdaCoverage > 45 && deal.ebitda > 0) {
+    return {
+      verdict_sentiment: "choke_warning",
+      verdict_title: "Financial Suffocation: You're Strangling The Golden Goose!",
+      shark_quote: `Hold on! You generate $${deal.ebitda}M in EBITDA, and this ${royaltyPct}% royalty takes $${calc.annualRoyaltyYear1}M (${ebitdaCoverage}% of your entire profit)! You'll choke this business of oxygen and go bankrupt before I get my cap. Lower the royalty rate or tie payments to gross profit!`,
+      deal_analysis: `At ${royaltyPct}% top-line royalty, debt service eats ${ebitdaCoverage}% of EBITDA, leaving virtually no cash buffer for reinvestment or working capital shocks.`,
+      founder_takeaway: `Lower royalty to ${Math.max(royaltyPct - 3, 2)}% or introduce a seasonal floor so debt doesn't cause operational insolvency.`,
+      suggested_counter_offer: `$${investmentAmount}M upfront for ${Math.max(royaltyPct - 3, 2.5)}% royalty until ${paybackCapMult}x cap, plus ${Math.min(residualEquityPct + 2, 10)}% equity.`,
+      ai_powered: false,
+    };
+  }
+
+  // Scenario 2: Monster Return / High Yield (IRR >= 24% or (Cap >= 2.5x with IRR >= 20%))
+  // Matches user's screenshot: 27.5% IRR with 3.0x Cap ($21.8M returned!)
+  if (irr >= 24 || (paybackCapMult >= 2.5 && irr >= 20)) {
+    const isVampire = paybackCapMult >= 2.5;
+    return {
+      verdict_sentiment: "deal",
+      verdict_title: isVampire 
+        ? "Now You're Speaking My Language: 3x Money Back & A Golden Royalty!"
+        : "Shark Feeding Frenzy: An Extraordinary Return!",
+      shark_quote: isVampire
+        ? `You want $${investmentAmount}M and you're willing to pay me a ${paybackCapMult}x cap until I collect $${totalCapAmount}M back at a ${irr}% IRR? Mark Cuban will say I'm a vampire, and he's right! I don't want your board seat, and I don't want to attend your Zoom calls. I just want royalty checks rolling into my account. Shake my hand!`
+        : `Money is binary: it either sleeps or it works. A ${irr}% IRR is better than any index fund on Wall Street. Plus with ${residualEquityPct}% equity, I ride your upside forever. That's why they call me Mr. Wonderful! We have a deal!`,
+      deal_analysis: `High-yield structure: ${royaltyPct}% royalty on $${deal.revenue}M revenue generates $${calc.annualRoyaltyYear1}M in Year 1. Investor earns ${irr}% annualized IRR while the founder preserves +${calc.founderDilutionSaved}% equity vs institutional buyout.`,
+      founder_takeaway: `Exceptional win-win: non-dilutive capital secured without surrendering majority governance or operational control.`,
+      suggested_counter_offer: `Lock in terms: $${investmentAmount}M upfront for ${royaltyPct}% royalty until ${paybackCapMult}x ($${totalCapAmount}M total), then ${residualEquityPct}% perpetual equity.`,
+      ai_powered: false,
+    };
+  }
+
+  // Scenario 3: Clean Sweet-Spot Deal (Payback <= 44 mo and IRR >= 16%)
+  if (months <= 44 && irr >= 16) {
+    return {
+      verdict_sentiment: "deal",
+      verdict_title: "Royalty Checks Every Morning: It's A Deal!",
+      shark_quote: `This is music to my ears. My $${investmentAmount}M comes back in ~${calc.paybackYears} years (${months} months), and then I ride ${residualEquityPct}% equity into the sunset. No boardroom politics, no equity squabbles. Clean, disciplined, beautiful. Let's write the check!`,
+      deal_analysis: `Rapid capital velocity: capital is fully recouped in ${months} months. Low EBITDA impact (${ebitdaCoverage}%) ensures company cash runway remains intact.`,
+      founder_takeaway: `Clean payback horizon avoids debt covenants while giving Mr. Wonderful his signature cashflow.`,
+      suggested_counter_offer: `Proceed with $${investmentAmount}M upfront at ${royaltyPct}% royalty until ${paybackCapMult}x cap.`,
+      ai_powered: false,
+    };
+  }
+
+  // Scenario 4: Counter-Offer / Squeeze (Payback 44-72 mo with modest IRR 13-23%)
+  if (months <= 72 && irr >= 13) {
+    const needMoreEquity = residualEquityPct < 4;
+    return {
+      verdict_sentiment: "counter_offer",
+      verdict_title: "I Like The Business, But My Money Is Walking Back With A Cane",
+      shark_quote: needMoreEquity
+        ? `Look, I like ${deal.target_company || deal.name}, but taking ${calc.paybackYears} years to get my capital returned is too slow for pure cash. If I'm waiting that long, I need dessert! Give me a ${Math.max(residualEquityPct + 3, 5)}% perpetual equity kicker and I'll fund the $${investmentAmount}M today. Deal or no deal?`
+        : `I don't hate this, but ${calc.paybackYears} years is a long time in tech. Here's my counter-offer: bump the royalty to ${Math.min(royaltyPct + 2, 12)}% until my $${investmentAmount}M principal is recouped, then drop it to 2% until the ${paybackCapMult}x cap. That protects my downside!`,
+      deal_analysis: `Borderline payback speed (${months} months). Projected IRR of ${irr}% is acceptable but requires downside acceleration or an increased equity sweetener.`,
+      founder_takeaway: `Counter with a step-down royalty (higher rate during Year 1-2, dropping sharply once principal is safe).`,
+      suggested_counter_offer: `$${investmentAmount}M for ${Math.min(royaltyPct + 1.5, 10)}% early royalty stepped down to 2.5% after principal, with ${Math.max(residualEquityPct, 5)}% equity.`,
+      ai_powered: false,
+    };
+  }
+
+  // Scenario 5: Truly Dead To Me (IRR < 13% or Payback > 72 mo / 6+ years)
+  return {
+    verdict_sentiment: "dead_to_me",
+    verdict_title: "Take It Behind The Barn And Shoot It!",
+    shark_quote: `Stop the madness! You want $${investmentAmount}M of my money, and it will take ${calc.paybackYears} years (${months} months) just to crawl back at a pathetic ${irr}% return? I can buy 10-year US Treasuries and sleep on a beach in St. Barts without dealing with your headaches! You are dead to me!`,
+    deal_analysis: `Unacceptable capital lockup: ${months} months to reach payback cap generates an anemic ${irr}% IRR. The opportunity cost of capital makes this mathematically unviable for private equity.`,
+    founder_takeaway: `Substantially increase the royalty rate, reduce the cash ask, or increase the growth forecast to compress the payback horizon.`,
+    suggested_counter_offer: `Reduce cash ask to $${(investmentAmount * 0.6).toFixed(1)}M or increase royalty to ${Math.min(royaltyPct + 3, 12)}% to achieve a <48-month payback.`,
+    ai_powered: false,
+  };
+}
 
 interface MrWonderfulDealStructurerProps {
   deals: Deal[];
@@ -137,6 +231,21 @@ export const MrWonderfulDealStructurer: React.FC<MrWonderfulDealStructurerProps>
     };
   }, [currentDeal, investmentAmount, royaltyPct, paybackCapMult, residualEquityPct, annualGrowthPct]);
 
+  // Live dynamic critique reactive to every slider movement
+  const activeCritique = useMemo(() => {
+    return evaluateKevinStructure(
+      investmentAmount,
+      royaltyPct,
+      paybackCapMult,
+      residualEquityPct,
+      currentDeal,
+      calculations
+    );
+  }, [investmentAmount, royaltyPct, paybackCapMult, residualEquityPct, currentDeal, calculations]);
+
+  // If user clicked "Ask Kevin", use that snapshot; otherwise use reactive live critique
+  const displayedCritique = critique || activeCritique;
+
   const handleAskKevin = async () => {
     setCritiqueLoading(true);
     try {
@@ -152,24 +261,31 @@ export const MrWonderfulDealStructurer: React.FC<MrWonderfulDealStructurerProps>
         investor_irr_pct: parseFloat(calculations.irrPct),
       });
       setCritique(res);
+      if (res.verdict_sentiment === "deal") {
+        toast.success(`🦈 Kevin O'Leary: "${res.verdict_title}"`);
+      } else if (res.verdict_sentiment === "counter_offer" || res.verdict_sentiment === "caution") {
+        toast.warning(`⚖️ Kevin O'Leary: "${res.verdict_title}"`);
+      } else {
+        toast.error(`☠️ Kevin O'Leary: "${res.verdict_title}"`);
+      }
     } catch {
-      // Fallback critique
-      const isGood = calculations.monthsToPayback <= 36 && parseFloat(calculations.irrPct) >= 20;
-      setCritique({
-        verdict_title: isGood 
-          ? "Now You're Speaking My Language: Royalty Checks Every Morning!" 
-          : "Take It Behind The Barn And Shoot It!",
-        shark_quote: isGood
-          ? "Money is binary. It either works or it dies. With a 5% royalty, my money comes home in under 3 years, and I get a perpetual equity kicker forever. That's why they call me Mr. Wonderful!"
-          : "Stop the madness! You are bleeding cash, and this royalty is going to choke whatever oxygen is left in this business. You are dead to me!",
-        verdict_sentiment: isGood ? "deal" : "dead_to_me",
-        deal_analysis: `At ${royaltyPct}% royalty on $${currentDeal.revenue}M revenue, the $${investmentAmount}M principal + cap is paid back in ~${calculations.paybackYears} years with a ${calculations.irrPct}% IRR.`,
-        founder_takeaway: isGood 
-          ? "Founder avoids giving up 25%+ equity while securing non-dilutive working capital." 
-          : "Lower the royalty rate or tie payouts directly to gross margin.",
-        suggested_counter_offer: `$${investmentAmount}M upfront for ${royaltyPct}% royalty until ${paybackCapMult}x cap, then ${residualEquityPct}% equity.`,
-        ai_powered: false,
-      });
+      // Offline fallback critique using rich multi-tier Shark Tank rules
+      const fallback = evaluateKevinStructure(
+        investmentAmount,
+        royaltyPct,
+        paybackCapMult,
+        residualEquityPct,
+        currentDeal,
+        calculations
+      );
+      setCritique(fallback);
+      if (fallback.verdict_sentiment === "deal") {
+        toast.success(`🦈 Kevin O'Leary: "${fallback.verdict_title}"`);
+      } else if (fallback.verdict_sentiment === "counter_offer" || fallback.verdict_sentiment === "caution") {
+        toast.warning(`⚖️ Kevin O'Leary: "${fallback.verdict_title}"`);
+      } else {
+        toast.error(`☠️ Kevin O'Leary: "${fallback.verdict_title}"`);
+      }
     } finally {
       setCritiqueLoading(false);
     }
@@ -221,7 +337,10 @@ Generated via DealCFO Dashboard
             <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">Deal Target:</span>
             <select
               value={activeDealId}
-              onChange={(e) => setActiveDealId(e.target.value)}
+              onChange={(e) => {
+                setActiveDealId(e.target.value);
+                setCritique(null);
+              }}
               className="text-xs bg-muted/60 border border-border rounded-md px-3 py-1.5 text-foreground font-medium focus:outline-none focus:ring-1 focus:ring-purple-500"
             >
               {deals.map((d) => (
@@ -268,6 +387,7 @@ Generated via DealCFO Dashboard
                       setRoyaltyPct(5.0);
                       setPaybackCapMult(2.0);
                       setResidualEquityPct(3.0);
+                      setCritique(null);
                     }}
                     className="p-1.5 text-left rounded-md bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 transition-all text-xs group"
                   >
@@ -281,6 +401,7 @@ Generated via DealCFO Dashboard
                       setRoyaltyPct(8.0);
                       setPaybackCapMult(1.5);
                       setResidualEquityPct(1.5);
+                      setCritique(null);
                     }}
                     className="p-1.5 text-left rounded-md bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all text-xs group"
                   >
@@ -294,6 +415,7 @@ Generated via DealCFO Dashboard
                       setRoyaltyPct(4.0);
                       setPaybackCapMult(1.75);
                       setResidualEquityPct(0.0);
+                      setCritique(null);
                     }}
                     className="p-1.5 text-left rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 transition-all text-xs group"
                   >
@@ -317,7 +439,10 @@ Generated via DealCFO Dashboard
                   max="10.0"
                   step="0.25"
                   value={investmentAmount}
-                  onChange={(e) => setInvestmentAmount(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setInvestmentAmount(parseFloat(e.target.value));
+                    setCritique(null);
+                  }}
                   className="w-full accent-purple-500 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
@@ -341,7 +466,10 @@ Generated via DealCFO Dashboard
                   max="12.0"
                   step="0.5"
                   value={royaltyPct}
-                  onChange={(e) => setRoyaltyPct(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setRoyaltyPct(parseFloat(e.target.value));
+                    setCritique(null);
+                  }}
                   className="w-full accent-emerald-500 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
@@ -365,7 +493,10 @@ Generated via DealCFO Dashboard
                   max="3.5"
                   step="0.1"
                   value={paybackCapMult}
-                  onChange={(e) => setPaybackCapMult(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setPaybackCapMult(parseFloat(e.target.value));
+                    setCritique(null);
+                  }}
                   className="w-full accent-cyan-500 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
@@ -389,7 +520,10 @@ Generated via DealCFO Dashboard
                   max="15.0"
                   step="0.5"
                   value={residualEquityPct}
-                  onChange={(e) => setResidualEquityPct(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setResidualEquityPct(parseFloat(e.target.value));
+                    setCritique(null);
+                  }}
                   className="w-full accent-amber-500 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
@@ -411,7 +545,10 @@ Generated via DealCFO Dashboard
                   max="50"
                   step="1"
                   value={annualGrowthPct}
-                  onChange={(e) => setAnnualGrowthPct(parseFloat(e.target.value))}
+                  onChange={(e) => {
+                    setAnnualGrowthPct(parseFloat(e.target.value));
+                    setCritique(null);
+                  }}
                   className="w-full accent-zinc-500 cursor-pointer"
                 />
               </div>
@@ -522,30 +659,48 @@ Generated via DealCFO Dashboard
           </Card>
 
           {/* AI / Shark Tank Critique Box */}
-          {critique && (
-            <Card className={`border p-4 transition-all animate-in fade-in-50 ${
-              critique.verdict_sentiment === "deal" 
-                ? "bg-emerald-950/20 border-emerald-500/40" 
-                : critique.verdict_sentiment === "dead_to_me"
-                ? "bg-rose-950/20 border-rose-500/40"
-                : "bg-amber-950/20 border-amber-500/40"
-            }`}>
+          {displayedCritique && (
+            <Card
+              data-testid="shark-tank-critique-card"
+              className={`border p-4 transition-all duration-300 ${
+                displayedCritique.verdict_sentiment === "deal" 
+                  ? "bg-emerald-950/20 border-emerald-500/40 shadow-sm shadow-emerald-950/30" 
+                  : displayedCritique.verdict_sentiment === "dead_to_me"
+                  ? "bg-rose-950/20 border-rose-500/40 shadow-sm shadow-rose-950/30"
+                  : displayedCritique.verdict_sentiment === "choke_warning"
+                  ? "bg-amber-950/25 border-amber-500/40 shadow-sm shadow-amber-950/30"
+                  : "bg-purple-950/20 border-purple-500/40 shadow-sm shadow-purple-950/30"
+              }`}
+            >
               <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <Badge className={`text-[10px] font-bold uppercase tracking-wider ${
-                      critique.verdict_sentiment === "deal"
-                        ? "bg-emerald-500/20 text-emerald-300"
-                        : critique.verdict_sentiment === "dead_to_me"
-                        ? "bg-rose-500/20 text-rose-300"
-                        : "bg-amber-500/20 text-amber-300"
-                    }`}>
-                      {critique.verdict_sentiment === "deal" ? "🦈 It's a Deal!" : critique.verdict_sentiment === "dead_to_me" ? "☠️ You're Dead to Me" : "⚖️ Shark Counter-Offer"}
+                <div className="space-y-1 w-full">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      data-testid="shark-verdict-badge"
+                      className={`text-[10px] font-bold uppercase tracking-wider ${
+                        displayedCritique.verdict_sentiment === "deal"
+                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                          : displayedCritique.verdict_sentiment === "dead_to_me"
+                          ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                          : displayedCritique.verdict_sentiment === "choke_warning"
+                          ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                          : "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                      }`}
+                    >
+                      {displayedCritique.verdict_sentiment === "deal" 
+                        ? "🦈 It's a Deal!" 
+                        : displayedCritique.verdict_sentiment === "dead_to_me" 
+                        ? "☠️ You're Dead to Me" 
+                        : displayedCritique.verdict_sentiment === "choke_warning"
+                        ? "⚠️ EBITDA Choke Risk"
+                        : "⚖️ Shark Counter-Offer"}
                     </Badge>
-                    <span className="text-xs font-bold text-foreground">{critique.verdict_title}</span>
+                    <span data-testid="shark-verdict-title" className="text-xs font-bold text-foreground">
+                      {displayedCritique.verdict_title}
+                    </span>
                   </div>
-                  <p className="text-xs italic text-foreground/90 font-serif pt-1">
-                    "{critique.shark_quote}"
+                  <p data-testid="shark-quote-text" className="text-xs italic text-foreground/90 font-serif pt-1 leading-relaxed">
+                    "{displayedCritique.shark_quote}"
                   </p>
                 </div>
               </div>
@@ -553,11 +708,11 @@ Generated via DealCFO Dashboard
               <div className="mt-3 pt-3 border-t border-border/40 grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 <div>
                   <span className="text-[11px] font-semibold text-muted-foreground block">Financial Critique:</span>
-                  <p className="text-[11px] text-foreground/80 mt-0.5 leading-relaxed">{critique.deal_analysis}</p>
+                  <p className="text-[11px] text-foreground/80 mt-0.5 leading-relaxed">{displayedCritique.deal_analysis}</p>
                 </div>
                 <div>
                   <span className="text-[11px] font-semibold text-muted-foreground block">Shark Counter-Offer / Advice:</span>
-                  <p className="text-[11px] text-cyan-400 font-mono mt-0.5">{critique.suggested_counter_offer}</p>
+                  <p className="text-[11px] text-cyan-400 font-mono mt-0.5">{displayedCritique.suggested_counter_offer}</p>
                 </div>
               </div>
             </Card>

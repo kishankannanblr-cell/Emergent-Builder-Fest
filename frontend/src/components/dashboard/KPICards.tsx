@@ -29,32 +29,32 @@ export const KPICards: React.FC<KPICardsProps> = ({ overview }) => {
       {/* 1. Active Pipeline Value */}
       <Card 
         data-testid="kpi-card-pipeline-value"
-        className="relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/80 hover:border-emerald-500/40 transition-all duration-200 group hover:shadow-lg hover:shadow-emerald-500/5"
+        className="relative overflow-hidden bg-[#121520] border-white/[0.08] hover:border-orange-500/40 transition-all duration-200 group hover:shadow-xl hover:shadow-orange-500/10"
       >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+        <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-orange-500/10 to-transparent rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Active Pipeline Value
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
               <Layers className="w-4 h-4" />
             </div>
           </div>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
               ${totalEv.toFixed(1)}M
             </span>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[11px] font-medium">
+            <Badge variant="outline" className="bg-orange-500/10 text-orange-400 border-orange-500/30 text-[11px] font-medium">
               <ArrowUpRight className="w-3 h-3 mr-0.5 inline" />
               +18.4% YoY
             </Badge>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40 pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-white/[0.06] pt-2.5">
             <span>{activeCount} active opportunities</span>
-            <span className="text-emerald-400/90 font-mono font-medium">
+            <span className="text-orange-400/90 font-mono font-medium">
               ${(totalEv * 0.58).toFixed(1)}M Weighted
             </span>
           </div>
@@ -64,31 +64,31 @@ export const KPICards: React.FC<KPICardsProps> = ({ overview }) => {
       {/* 2. EV / EBITDA Multiple */}
       <Card 
         data-testid="kpi-card-ev-multiple"
-        className="relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/80 hover:border-cyan-500/40 transition-all duration-200 group hover:shadow-lg hover:shadow-cyan-500/5"
+        className="relative overflow-hidden bg-[#121520] border-white/[0.08] hover:border-amber-500/40 transition-all duration-200 group hover:shadow-xl hover:shadow-amber-500/10"
       >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+        <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Avg EV / EBITDA Multiple
             </span>
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
               {avgMultiple.toFixed(1)}x
             </span>
-            <Badge variant="outline" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-[11px] font-medium">
+            <Badge variant="outline" className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[11px] font-medium">
               Target: 10-14x
             </Badge>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40 pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-white/[0.06] pt-2.5">
             <span>Range: 8.5x – 13.6x</span>
-            <span className="text-cyan-400/90 font-mono font-medium">-0.8x vs Index</span>
+            <span className="text-amber-400/90 font-mono font-medium">-0.8x vs Index</span>
           </div>
         </CardContent>
       </Card>
@@ -96,46 +96,46 @@ export const KPICards: React.FC<KPICardsProps> = ({ overview }) => {
       {/* 3. Portfolio Cash Runway */}
       <Card 
         data-testid="kpi-card-cash-runway"
-        className="relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/80 hover:border-amber-500/40 transition-all duration-200 group hover:shadow-lg hover:shadow-amber-500/5"
+        className="relative overflow-hidden bg-[#121520] border-white/[0.08] hover:border-emerald-500/40 transition-all duration-200 group hover:shadow-xl hover:shadow-emerald-500/10"
       >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+        <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-emerald-500/10 to-transparent rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Portfolio Cash Runway
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <Clock className="w-4 h-4" />
             </div>
           </div>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
-              {runwayMonths.toFixed(1)} <span className="text-base font-normal text-muted-foreground">Mos</span>
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
+              {runwayMonths.toFixed(1)} <span className="text-base font-normal text-slate-400">Mos</span>
             </span>
             <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[11px] font-medium">
               Healthy
             </Badge>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40 pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-white/[0.06] pt-2.5">
             <span>${cashBalance.toFixed(1)}M Reserves</span>
-            <span className="text-amber-400/90 font-mono font-medium">
+            <span className="text-emerald-400/90 font-mono font-medium">
               -${monthlyBurn.toFixed(2)}M /mo Net
             </span>
           </div>
         </CardContent>
       </Card>
 
-      {/* 4. Closed Deal Volume YTD */}
+      {/* 4. YTD Closed Deal Volume */}
       <Card 
         data-testid="kpi-card-closed-volume"
-        className="relative overflow-hidden bg-card/60 backdrop-blur-sm border-border/80 hover:border-purple-500/40 transition-all duration-200 group hover:shadow-lg hover:shadow-purple-500/5"
+        className="relative overflow-hidden bg-[#121520] border-white/[0.08] hover:border-purple-500/40 transition-all duration-200 group hover:shadow-xl hover:shadow-purple-500/10"
       >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
+        <div className="absolute top-0 right-0 w-28 h-28 bg-gradient-to-bl from-purple-500/10 to-transparent rounded-bl-full pointer-events-none group-hover:scale-110 transition-transform" />
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               YTD Closed Volume
             </span>
             <div className="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
@@ -144,7 +144,7 @@ export const KPICards: React.FC<KPICardsProps> = ({ overview }) => {
           </div>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading">
+            <span className="text-2xl sm:text-3xl font-extrabold tracking-tight font-heading text-white">
               ${closedVolume.toFixed(1)}M
             </span>
             <Badge variant="outline" className="bg-purple-500/10 text-purple-400 border-purple-500/30 text-[11px] font-medium">
@@ -152,9 +152,11 @@ export const KPICards: React.FC<KPICardsProps> = ({ overview }) => {
             </Badge>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground border-t border-border/40 pt-2.5">
+          <div className="mt-3 flex items-center justify-between text-xs text-slate-400 border-t border-white/[0.06] pt-2.5">
             <span>Target: $120M Fund</span>
-            <span className="text-purple-400/90 font-mono font-medium">43.3% Deployed</span>
+            <span className="text-purple-400/90 font-mono font-medium">
+              {((closedVolume / 120) * 100).toFixed(1)}% Deployed
+            </span>
           </div>
         </CardContent>
       </Card>

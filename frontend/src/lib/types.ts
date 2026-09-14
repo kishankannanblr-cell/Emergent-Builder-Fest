@@ -212,10 +212,35 @@ export interface MrWonderfulCritiqueRequest {
 export interface MrWonderfulCritiqueResponse {
   verdict_title: string;
   shark_quote: string;
-  verdict_sentiment: "deal" | "caution" | "dead_to_me";
+  verdict_sentiment: "deal" | "caution" | "dead_to_me" | "choke_warning" | "counter_offer";
   deal_analysis: string;
   founder_takeaway: string;
   suggested_counter_offer: string;
   ai_powered: boolean;
 }
+
+export interface AICopilotAction {
+  label: string;
+  action_type: string;
+  payload: Record<string, any>;
+}
+
+export interface AICopilotChatRequest {
+  query: string;
+  model: string;
+  persona: string;
+  context?: Record<string, any>;
+  history?: Array<{ role: string; content: string }>;
+}
+
+export interface AICopilotChatResponse {
+  reply: string;
+  model_used: string;
+  persona: string;
+  latency_ms: number;
+  suggested_actions: AICopilotAction[];
+  sources: string[];
+  ai_powered: boolean;
+}
+
 

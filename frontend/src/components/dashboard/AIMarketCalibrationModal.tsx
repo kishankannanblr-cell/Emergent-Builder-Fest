@@ -377,7 +377,7 @@ export const AIMarketCalibrationModal: React.FC<AIMarketCalibrationModalProps> =
             onClick={handleApply}
             disabled={!calibration || applied}
             data-testid="btn-apply-ai-calibration"
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-900/40"
+            className="amber-gradient-btn font-semibold text-xs flex items-center gap-1.5"
           >
             {applied ? (
               <>

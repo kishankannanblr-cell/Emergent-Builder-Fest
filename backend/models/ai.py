@@ -59,3 +59,25 @@ class MrWonderfulCritiqueResponse(BaseModel):
     founder_takeaway: str
     suggested_counter_offer: str
     ai_powered: bool = True
+
+class AICopilotAction(BaseModel):
+    label: str
+    action_type: str  # e.g., "set_wacc", "set_multiple", "navigate_tab", "run_dcf", "open_memo"
+    payload: dict = Field(default_factory=dict)
+
+class AICopilotChatRequest(BaseModel):
+    query: str
+    model: str = "gemini-1.5-flash"  # "gemini-1.5-flash", "gemini-1.5-pro", "institutional-offline"
+    persona: str = "cfo"  # "cfo" or "mr_wonderful"
+    context: Optional[dict] = None  # active deal, dcf parameters, runway overview
+    history: Optional[List[dict]] = None
+
+class AICopilotChatResponse(BaseModel):
+    reply: str
+    model_used: str
+    persona: str
+    latency_ms: int
+    suggested_actions: List[AICopilotAction] = Field(default_factory=list)
+    sources: List[str] = Field(default_factory=list)
+    ai_powered: bool = True
+

@@ -193,10 +193,10 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
   return (
     <div className="space-y-6">
       {/* Header with Deal Preset Loader */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-muted/20 border border-border/80 p-4 rounded-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 obsidian-card p-4 rounded-xl">
         <div>
           <h2 className="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            <Calculator className="w-5 h-5 text-emerald-400" />
+            <Calculator className="w-5 h-5 text-orange-400" />
             Interactive M&A Valuation & DCF Estimator
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -231,7 +231,7 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
           data-testid="tab-dcf-model"
           className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 ${
             activeTab === "dcf" 
-              ? "bg-emerald-600 text-white shadow-md shadow-emerald-950/40" 
+              ? "amber-gradient-btn shadow-md shadow-orange-950/40" 
               : "bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/60"
           }`}
         >
@@ -261,11 +261,11 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Parameter Control Panel */}
           <div className="lg:col-span-5 space-y-4">
-            <Card className="border-border/80 bg-card/60">
+            <Card className="obsidian-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-bold flex items-center justify-between">
                   <span className="flex items-center gap-2">
-                    <Sliders className="w-4 h-4 text-emerald-400" />
+                    <Sliders className="w-4 h-4 text-orange-400" />
                     Key Valuation Assumptions
                   </span>
                   <div className="flex items-center gap-2">
@@ -275,12 +275,12 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
                       variant="outline"
                       onClick={() => setIsCalibrationOpen(true)}
                       data-testid="btn-open-ai-calibration"
-                      className="h-7 text-[11px] px-2.5 bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300 flex items-center gap-1.5 shadow-sm"
+                      className="h-7 text-[11px] px-2.5 bg-orange-500/10 border-orange-500/30 text-orange-400 hover:bg-orange-500/20 hover:text-orange-300 flex items-center gap-1.5 shadow-sm"
                     >
-                      <Sparkles className="w-3 h-3 text-emerald-400 animate-pulse" />
+                      <Sparkles className="w-3 h-3 text-orange-400 animate-pulse" />
                       {isCalibrated ? "AI Calibrated ✓" : "✨ AI Market Benchmark"}
                     </Button>
-                    <Badge variant="outline" className="text-[10px] text-emerald-400 border-emerald-500/30 hidden sm:inline-flex">
+                    <Badge variant="outline" className="text-[10px] text-orange-400 border-orange-500/30 hidden sm:inline-flex">
                       Live Recalculation
                     </Badge>
                   </div>
@@ -448,8 +448,8 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
         <div className="lg:col-span-7 space-y-4">
           {/* Key Implied Valuation Metric Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Card className="bg-emerald-500/10 border-emerald-500/30 p-3">
-              <span className="text-[10px] text-emerald-400 font-semibold uppercase tracking-wider block">
+            <Card className="bg-orange-500/10 border-orange-500/30 p-3">
+              <span className="text-[10px] text-orange-400 font-semibold uppercase tracking-wider block">
                 Implied Enterprise Value
               </span>
               <div 
@@ -492,10 +492,10 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
           </div>
 
           {/* 5-Year Financial Forecast Chart */}
-          <Card className="border-border/80 bg-card/60 p-4">
+          <Card className="obsidian-card p-4">
             <div className="flex items-center justify-between pb-3">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <TrendingUp className="w-4 h-4 text-orange-400" />
                 5-Year Revenue, EBITDA & Free Cash Flow Forecast ($M)
               </h3>
             </div>
@@ -519,11 +519,11 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
           </Card>
 
           {/* 5x5 WACC vs Exit Multiple Sensitivity Matrix Table */}
-          <Card className="border-border/80 bg-card/60">
+          <Card className="obsidian-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
                 <span>Enterprise Value Sensitivity Matrix ($M)</span>
-                <span className="text-[10px] text-emerald-400 lowercase font-mono">
+                <span className="text-[10px] text-orange-400 lowercase font-mono">
                   Rows: WACC (%) | Cols: Exit Multiple (x)
                 </span>
               </CardTitle>
@@ -537,7 +537,7 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
                       <th
                         key={m}
                         className={`p-2 font-mono font-bold ${
-                          m === params.exit_multiple ? "text-emerald-400 bg-emerald-500/10 rounded-t" : "text-muted-foreground"
+                          m === params.exit_multiple ? "text-orange-400 bg-orange-500/10 rounded-t" : "text-muted-foreground"
                         }`}
                       >
                         {m}x
@@ -564,7 +564,7 @@ export const ValuationDCFEstimator: React.FC<ValuationDCFEstimatorProps> = ({
                             data-testid={`sensitivity-cell-${w}-${m}`}
                             className={`p-2 font-mono font-medium transition-colors ${
                               isCurrentBase
-                                ? "bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 rounded shadow-sm"
+                                ? "bg-orange-500/20 text-orange-300 font-bold border border-orange-500/40 rounded shadow-sm"
                                 : "text-foreground"
                             }`}
                           >

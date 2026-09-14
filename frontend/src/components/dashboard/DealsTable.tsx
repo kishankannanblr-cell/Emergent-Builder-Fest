@@ -132,7 +132,7 @@ export const DealsTable: React.FC<DealsTableProps> = ({
   return (
     <div className="space-y-4">
       {/* Search & Filter Toolbars */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-muted/20 border border-border/80 p-3.5 rounded-xl">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 obsidian-card p-3.5 rounded-xl">
         <div className="flex flex-wrap items-center gap-2.5 flex-1">
           {/* Search */}
           <div className="relative w-full sm:w-64">
@@ -196,7 +196,7 @@ export const DealsTable: React.FC<DealsTableProps> = ({
             data-testid="deals-table-new-btn"
             size="sm"
             onClick={onNewDealClick}
-            className="h-8 text-xs gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold"
+            className="h-8 text-xs gap-1.5 amber-gradient-btn font-semibold"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Intake Opportunity</span>
@@ -205,7 +205,7 @@ export const DealsTable: React.FC<DealsTableProps> = ({
       </div>
 
       {/* Deals Datatable */}
-      <Card className="border-border/80 bg-card/60">
+      <Card className="obsidian-card">
         <CardContent className="p-0 overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead className="bg-muted/40 border-y border-border/60 text-muted-foreground font-semibold">
@@ -258,7 +258,7 @@ export const DealsTable: React.FC<DealsTableProps> = ({
                   >
                     {/* Deal Name & Target */}
                     <td className="p-3 max-w-[220px]">
-                      <span className="font-bold text-foreground group-hover:text-emerald-400 transition-colors block truncate">
+                      <span className="font-bold text-foreground group-hover:text-amber-400 transition-colors block truncate">
                         {deal.name}
                       </span>
                       <span className="text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5 truncate">
@@ -346,7 +346,7 @@ export const DealsTable: React.FC<DealsTableProps> = ({
                           variant="ghost"
                           size="icon-xs"
                           onClick={() => onOpenDCF(deal)}
-                          className="h-6 w-6 text-muted-foreground hover:text-emerald-400"
+                          className="h-6 w-6 text-muted-foreground hover:text-orange-400"
                           title="Simulate DCF"
                         >
                           <Calculator className="w-3.5 h-3.5" />
