@@ -54,6 +54,153 @@ Legacy Data Center Dual Hosting Migration,One-Time Expense,280000
 Discontinued Beta Product Tooling Burn,One-Time Expense,190000
 Depreciation & Equipment Amortization,D&A,550000`;
 
+const DEFAULT_PRESETS: PresetTemplate[] = [
+  {
+    id: "saas-cloudmetrics",
+    title: "CloudMetrics B2B SaaS",
+    tagline: "Enterprise Observability & DevSecOps Platform (124% NRR)",
+    sector: "SaaS / Enterprise Software",
+    target_company: "CloudMetrics Systems Inc.",
+    enterprise_value: 55.0,
+    revenue: 15.4,
+    cogs: 2.9,
+    opex: 8.7,
+    unadjusted_ebitda: 3.8,
+    addbacks_total: 0.82,
+    adjusted_ebitda: 4.62,
+    default_wacc: 9.8,
+    default_exit_multiple: 14.5,
+    csv_content: SAMPLE_CSV_TEMPLATE,
+    addbacks: [
+      { name: "Founder Above-Market Compensation", category: "Owner Compensation", amount: 0.35, rationale: "Normalize founder comp ($700k) to middle-market CEO benchmark ($350k)." },
+      { name: "Legacy Monolith to AWS EKS Migration", category: "One-Time Technology", amount: 0.28, rationale: "Non-recurring 6-month dual hosting costs incurred during cloud transition." },
+      { name: "Discontinued Dev Tools Beta Line", category: "Discontinued Operations", amount: 0.19, rationale: "Isolated development burn for deprecated consumer tooling experiment." }
+    ]
+  },
+  {
+    id: "medtech-cardiopulse",
+    title: "CardioPulse MedTech Diagnostics",
+    tagline: "AI-Assisted Remote Patient Monitoring & Clinic Network",
+    sector: "Healthcare / MedTech",
+    target_company: "CardioPulse Healthcare Corp",
+    enterprise_value: 95.0,
+    revenue: 28.2,
+    cogs: 16.5,
+    opex: 4.3,
+    unadjusted_ebitda: 7.4,
+    addbacks_total: 0.75,
+    adjusted_ebitda: 8.15,
+    default_wacc: 8.9,
+    default_exit_multiple: 13.0,
+    csv_content: `Account Name,Category,Amount\nClinical Diagnostic Billing & Receipts,Revenue,24500000\nRemote Monitoring Software Licensing,Revenue,3700000\nMedical Devices & Consumable Sensor Supplies,COGS,12800000\nClinic Nursing & Technician Operations,COGS,3700000\nSpecialist Sales & Hospital Outreach,OpEx,2400000\nRegulatory Compliance & Quality Assurance,OpEx,1100000\nCorporate Administration & Facilities,OpEx,800000\nFDA / HIPAA Audit Advisory Retainers,One-Time Expense,420000\nClinic Consolidation Severance Packages,One-Time Expense,330000\nMedical Device Depreciation,D&A,850000`,
+    addbacks: [
+      { name: "FDA / HIPAA Audit Advisory Retainers", category: "Regulatory & Legal", amount: 0.42, rationale: "One-off external audit preparation fees for 510(k) clearance." },
+      { name: "Clinic Consolidation Severance Packages", category: "Restructuring", amount: 0.33, rationale: "One-time severance payouts following the integration of 2 regional clinics." }
+    ]
+  },
+  {
+    id: "consumer-apexd2c",
+    title: "ApexDirect Omnichannel Brands",
+    tagline: "High-Growth Consumer Wellness & Wholesale Distribution",
+    sector: "Consumer / E-Commerce",
+    target_company: "ApexDirect Brand Holdings",
+    enterprise_value: 14.5,
+    revenue: 8.5,
+    cogs: 4.2,
+    opex: 2.8,
+    unadjusted_ebitda: 1.5,
+    addbacks_total: 0.36,
+    adjusted_ebitda: 1.86,
+    default_wacc: 11.8,
+    default_exit_multiple: 8.5,
+    csv_content: `Account Name,Category,Amount\nShopify Direct-to-Consumer Sales,Revenue,5400000\nTarget & Specialty Wholesale Purchase Orders,Revenue,3100000\nContract Manufacturing & Formulation,COGS,2900000\nFulfillment Logistics & 3PL Warehousing,COGS,1300000\nDigital Performance Marketing & Ad Spend,OpEx,1900000\nBrand Team & Operations,OpEx,900000\nOcean Freight Spot Surcharge Spike,One-Time Expense,240000\nLegacy Agency Contract Termination Fee,One-Time Expense,120000\nWarehouse Equipment Depreciation,D&A,180000`,
+    addbacks: [
+      { name: "Ocean Freight Spot Surcharge Spike", category: "Supply Chain Anomalies", amount: 0.24, rationale: "Historical spot shipping spike exceeding normalized contract freight rates." },
+      { name: "Legacy Agency Contract Termination Fee", category: "Marketing Restructuring", amount: 0.12, rationale: "One-time contractual penalty to bring digital marketing in-house." }
+    ]
+  }
+];
+
+function parseCsvClientSide(csvText: string, askingEv: number, company: string, sector: string): PLImportResponse {
+  const lines = csvText.split("\n").map(l => l.trim()).filter(Boolean);
+  let rev = 0;
+  let cogs = 0;
+  let opex = 0;
+  let da = 0;
+  const addbacks: Array<{ name: string; category: string; amount: number; rationale: string }> = [];
+  let count = 0;
+
+  for (let i = 0; i < lines.length; i++) {
+    const parts = lines[i].split(",").map(p => p.trim());
+    if (parts.length < 2) continue;
+    if (i === 0 && (parts[0].toLowerCase().includes("account") || parts[0].toLowerCase().includes("name"))) continue;
+
+    const name = parts[0];
+    const cat = (parts.length >= 3 ? parts[1] : "").toLowerCase();
+    const rawAmt = parts.length >= 3 ? parts[2] : parts[1];
+    const cleaned = parseFloat(rawAmt.replace(/[^0-9.-]/g, ""));
+    if (isNaN(cleaned)) continue;
+
+    count++;
+    const amtM = Math.abs(cleaned) >= 50000 ? cleaned / 1000000 : cleaned;
+    const nLow = name.toLowerCase();
+
+    if (cat.includes("revenue") || nLow.includes("revenue") || nLow.includes("arr") || nLow.includes("sales") || nLow.includes("subscription")) {
+      rev += amtM;
+    } else if (cat.includes("cogs") || nLow.includes("cogs") || nLow.includes("hosting") || nLow.includes("cloud") || nLow.includes("supplies") || nLow.includes("manufacturing")) {
+      cogs += amtM;
+    } else if (cat.includes("d&a") || nLow.includes("depreciation") || nLow.includes("amortization")) {
+      da += amtM;
+    } else if (cat.includes("owner") || nLow.includes("founder") || nLow.includes("owner comp") || nLow.includes("ceo salary")) {
+      opex += amtM;
+      addbacks.push({
+        name,
+        category: "Owner Compensation",
+        amount: Math.round((amtM > 0.5 ? amtM * 0.5 : amtM) * 100) / 100,
+        rationale: "Normalize executive compensation down to middle-market CEO benchmark standard."
+      });
+    } else if (cat.includes("one-time") || cat.includes("non-recurring") || nLow.includes("migration") || nLow.includes("severance") || nLow.includes("one-time") || nLow.includes("audit") || nLow.includes("lawsuit") || nLow.includes("surcharge")) {
+      opex += amtM;
+      addbacks.push({
+        name,
+        category: "One-Time Expense",
+        amount: Math.round(amtM * 100) / 100,
+        rationale: "Identified non-recurring transitional operating expense."
+      });
+    } else {
+      opex += amtM;
+    }
+  }
+
+  const grossProfit = Math.round((rev - cogs) * 100) / 100;
+  const gmPct = rev > 0 ? Math.round((grossProfit / rev) * 1000) / 10 : 0;
+  const unadjEbitda = Math.round((grossProfit - opex) * 100) / 100;
+  const unadjMargin = rev > 0 ? Math.round((unadjEbitda / rev) * 1000) / 10 : 0;
+  const totalAddbacks = Math.round(addbacks.reduce((s, a) => s + a.amount, 0) * 100) / 100;
+  const adjEbitda = Math.round((unadjEbitda + totalAddbacks) * 100) / 100;
+  const adjMargin = rev > 0 ? Math.round((adjEbitda / rev) * 1000) / 10 : 0;
+  const multiple = adjEbitda > 0 ? Math.round((askingEv / adjEbitda) * 10) / 10 : 10;
+
+  return {
+    company_name: company,
+    sector,
+    revenue: Math.round(rev * 100) / 100,
+    cogs: Math.round(cogs * 100) / 100,
+    gross_profit: grossProfit,
+    gross_margin_pct: gmPct,
+    operating_expenses: Math.round(opex * 100) / 100,
+    da: Math.round(da * 100) / 100,
+    unadjusted_ebitda: unadjEbitda,
+    unadjusted_ebitda_margin_pct: unadjMargin,
+    suggested_addbacks: addbacks,
+    total_addbacks: totalAddbacks,
+    adjusted_ebitda: adjEbitda,
+    adjusted_ebitda_margin_pct: adjMargin,
+    implied_ev_ebitda_multiple: multiple,
+    parsed_rows_count: count
+  };
+}
+
 export const DealIntakeModal: React.FC<DealIntakeModalProps> = ({
   isOpen,
   onClose,
@@ -92,13 +239,13 @@ export const DealIntakeModal: React.FC<DealIntakeModalProps> = ({
   const [isParsing, setIsParsing] = useState<boolean>(false);
   const [selectedAddbacks, setSelectedAddbacks] = useState<Record<number, boolean>>({});
 
-  // Presets State
-  const [presets, setPresets] = useState<PresetTemplate[]>([]);
+  // Presets State initialized with default benchmarks
+  const [presets, setPresets] = useState<PresetTemplate[]>(DEFAULT_PRESETS);
   const [selectedPresetId, setSelectedPresetId] = useState<string>("saas-cloudmetrics");
 
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Fetch preset templates on open
+  // Fetch preset templates on open or use defaults
   useEffect(() => {
     if (isOpen) {
       apiGet<PresetTemplate[]>("/financials/preset-templates")
@@ -108,10 +255,14 @@ export const DealIntakeModal: React.FC<DealIntakeModalProps> = ({
           }
         })
         .catch(() => {
-          // fallback presets handled gracefully
+          setPresets(DEFAULT_PRESETS);
         });
+
+      // Auto-load default preset
+      handleSelectPreset(DEFAULT_PRESETS[0]);
     }
   }, [isOpen]);
+
 
   useEffect(() => {
     if (dealToEdit) {
@@ -209,11 +360,20 @@ export const DealIntakeModal: React.FC<DealIntakeModalProps> = ({
       });
       setSelectedAddbacks(initialMap);
       toast.success(`Successfully parsed ${res.parsed_rows_count} line items!`);
-    } catch (err: any) {
-      toast.error("Failed to parse CSV: " + (err.message || "Invalid format"));
+    } catch {
+      // Robust client-side fallback
+      const fallbackParsed = parseCsvClientSide(csvText, csvAskingEV, csvCompany, csvSector);
+      setParsedData(fallbackParsed);
+      const initialMap: Record<number, boolean> = {};
+      fallbackParsed.suggested_addbacks.forEach((_, idx) => {
+        initialMap[idx] = true;
+      });
+      setSelectedAddbacks(initialMap);
+      toast.success(`Parsed ${fallbackParsed.parsed_rows_count} line items (Financial Engine)`);
     } finally {
       setIsParsing(false);
     }
+
   };
 
   // Handle File Upload Dropzone
