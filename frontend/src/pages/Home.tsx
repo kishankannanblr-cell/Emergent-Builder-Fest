@@ -17,8 +17,9 @@ import { AboutPage } from "@/components/dashboard/AboutPage";
 import { GlobalAICopilotDrawer } from "@/components/dashboard/GlobalAICopilotDrawer";
 import { Toaster } from "@/components/ui/sonner";
 import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from "@/lib/api";
-import type { Deal, DealCreate, DealUpdate, FinancialOverview, CashRunwayResponse } from "@/lib/types";
+import type { Deal, DealCreate, DealUpdate, DealWithAdjustmentsCreate, FinancialOverview, CashRunwayResponse } from "@/lib/types";
 import { toast } from "sonner";
+
 
 // Static fallback seed data in case preview is served statically without backend (TEMPLATE.md §4)
 const FALLBACK_DEALS: Deal[] = [
@@ -327,13 +328,28 @@ export default function Home() {
     }
   };
 
-  const handleDealIntakeSubmit = async (formData: DealCreate | DealUpdate, isEdit: boolean) => {
+  const handleDealIntakeSubmit = async (formData: DealCreate | DealUpdate | DealWithAdjustmentsCreate, isEdit: boolean) => {
     if (isEdit && dealToEdit) {
-      await updateDealMutation.mutateAsync({ id: dealToEdit.id, data: formData });
+      await updateDealMutation.mutateAsync({ id: dealToEdit.id, data: formData as DealUpdate });
+    } else if ("adjustments" in formData && (formData as DealWithAdjustmentsCreate).adjustments?.length > 0) {
+      try {
+        const res = await apiPost<{ message: string; deal: Deal; adjustments: any[] }>("/financials/import-deal-with-adjustments", formData);
+        await queryClient.invalidateQueries({ queryKey: ["deals"] });
+        await queryClient.invalidateQueries({ queryKey: ["financial-overview"] });
+        await queryClient.invalidateQueries({ queryKey: ["ebitda-adjustments"] });
+        toast.success(`Imported "${formData.name}" with ${formData.adjustments.length} QoE Adjustments!`);
+        if (res?.deal) {
+          setDcfSelectedDeal(res.deal);
+        }
+      } catch (err: any) {
+        // Fallback: create deal directly if endpoint is unavailable
+        await createDealMutation.mutateAsync(formData as DealCreate);
+      }
     } else {
       await createDealMutation.mutateAsync(formData as DealCreate);
     }
   };
+
 
   const handleOpenDCF = (deal: Deal) => {
     setDcfSelectedDeal(deal);

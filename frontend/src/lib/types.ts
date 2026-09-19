@@ -243,4 +243,90 @@ export interface AICopilotChatResponse {
   ai_powered: boolean;
 }
 
+export interface QoEAddbackItem {
+  name: string;
+  category: string;
+  amount: number;
+  rationale: string;
+}
+
+export interface PLImportRequest {
+  company_name: string;
+  sector: string;
+  deal_type: string;
+  asking_price_ev: number;
+  lead_partner: string;
+  csv_text?: string;
+  custom_rows?: Array<{
+    account_name: string;
+    category: string;
+    amount: number;
+    is_addback_candidate?: boolean;
+    suggested_addback_reason?: string;
+  }>;
+}
+
+export interface PLImportResponse {
+  company_name: string;
+  sector: string;
+  revenue: number;
+  cogs: number;
+  gross_profit: number;
+  gross_margin_pct: number;
+  operating_expenses: number;
+  da: number;
+  unadjusted_ebitda: number;
+  unadjusted_ebitda_margin_pct: number;
+  suggested_addbacks: QoEAddbackItem[];
+  total_addbacks: number;
+  adjusted_ebitda: number;
+  adjusted_ebitda_margin_pct: number;
+  implied_ev_ebitda_multiple: number;
+  parsed_rows_count: number;
+}
+
+export interface DealWithAdjustmentsCreate {
+  name: string;
+  target_company: string;
+  sector: string;
+  deal_type: string;
+  stage: string;
+  enterprise_value: number;
+  revenue: number;
+  ebitda: number;
+  ebitda_multiple: number;
+  lead_partner: string;
+  probability_pct: number;
+  cash_required: number;
+  target_close_date: string;
+  notes?: string;
+  adjustments: Array<{
+    name: string;
+    category: string;
+    amount: number;
+    adjustment_type: string;
+    notes?: string;
+  }>;
+}
+
+export interface PresetTemplate {
+  id: string;
+  title: string;
+  tagline: string;
+  sector: string;
+  target_company: string;
+  enterprise_value: number;
+  revenue: number;
+  cogs: number;
+  opex: number;
+  unadjusted_ebitda: number;
+  addbacks_total: number;
+  adjusted_ebitda: number;
+  default_wacc: number;
+  default_exit_multiple: number;
+  csv_content: string;
+  addbacks: QoEAddbackItem[];
+}
+
+
 

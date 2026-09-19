@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException
-from typing import List
+from typing import List, Optional
+import csv
+import io
+import re
 from lib.db import db
 from models.financials import (
     EBITDAAdjustment,
@@ -12,12 +15,19 @@ from models.financials import (
     RunwayMonth,
     FinancialOverview,
     StageSummary,
-    SectorSummary
+    SectorSummary,
+    PLRowItem,
+    PLImportRequest,
+    PLImportResponse,
+    QoEAddbackItem,
+    DealWithAdjustmentsCreate,
+    PresetTemplate
 )
 from models.deal import Deal
 import math
 
 router = APIRouter(prefix="/financials", tags=["financials"])
+
 
 STAGES_ORDER = [
     "Lead Sourcing",
@@ -265,3 +275,324 @@ async def seed_data():
     from seed import run_seed
     await run_seed()
     return {"message": "Seed data successfully populated"}
+
+PRESET_TEMPLATES = [
+    PresetTemplate(
+        id="saas-cloudmetrics",
+        title="CloudMetrics B2B SaaS",
+        tagline="Enterprise Observability & DevSecOps Platform (124% NRR)",
+        sector="SaaS / Enterprise Software",
+        target_company="CloudMetrics Systems Inc.",
+        enterprise_value=55.0,
+        revenue=15.4,
+        cogs=2.9,
+        opex=8.7,
+        unadjusted_ebitda=3.8,
+        addbacks_total=0.82,
+        adjusted_ebitda=4.62,
+        default_wacc=9.8,
+        default_exit_multiple=14.5,
+        csv_content="""Account Name,Category,Amount
+Recurring Platform Subscriptions (ARR),Revenue,13800000
+Professional Onboarding & Services,Revenue,1600000
+Cloud Hosting & AWS Multi-Region Infrastructure,COGS,2100000
+Customer Support & Technical Tier-3 Ops,COGS,800000
+Sales & Marketing Enterprise Go-To-Market,OpEx,4800000
+R&D Core Engine Engineering Payroll,OpEx,2700000
+General & Administrative Overhead,OpEx,1200000
+Founder Above-Market Compensation,Owner Compensation,350000
+Legacy Monolith to AWS EKS Migration,One-Time Expense,280000
+Discontinued Dev Tools Beta Line,One-Time Expense,190000
+Depreciation & Amortization,D&A,450000""",
+        addbacks=[
+            QoEAddbackItem(name="Founder Above-Market Compensation", category="Owner Compensation", amount=0.35, rationale="Normalize founder comp ($700k) to middle-market CEO benchmark ($350k)."),
+            QoEAddbackItem(name="Legacy Monolith to AWS EKS Migration", category="One-Time Technology", amount=0.28, rationale="Non-recurring 6-month dual hosting costs incurred during cloud transition."),
+            QoEAddbackItem(name="Discontinued Dev Tools Beta Line", category="Discontinued Operations", amount=0.19, rationale="Isolated development burn for deprecated consumer tooling experiment.")
+        ]
+    ),
+    PresetTemplate(
+        id="medtech-cardiopulse",
+        title="CardioPulse MedTech Diagnostics",
+        tagline="AI-Assisted Remote Patient Monitoring & Clinic Network",
+        sector="Healthcare / MedTech",
+        target_company="CardioPulse Healthcare Corp",
+        enterprise_value=95.0,
+        revenue=28.2,
+        cogs=16.5,
+        opex=4.3,
+        unadjusted_ebitda=7.4,
+        addbacks_total=0.75,
+        adjusted_ebitda=8.15,
+        default_wacc=8.9,
+        default_exit_multiple=13.0,
+        csv_content="""Account Name,Category,Amount
+Clinical Diagnostic Billing & Payor Receipts,Revenue,24500000
+Remote Monitoring Software Licensing,Revenue,3700000
+Medical Devices & Consumable Sensor Supplies,COGS,12800000
+Clinic Nursing & Technician Operations,COGS,3700000
+Specialist Sales & Hospital Outreach,OpEx,2400000
+Regulatory Compliance & Quality Assurance,OpEx,1100000
+Corporate Administration & Facilities,OpEx,800000
+FDA / HIPAA Audit Advisory Retainers,One-Time Expense,420000
+Clinic Consolidation Severance Packages,One-Time Expense,330000
+Medical Device Depreciation,D&A,850000""",
+        addbacks=[
+            QoEAddbackItem(name="FDA / HIPAA Audit Advisory Retainers", category="Regulatory & Legal", amount=0.42, rationale="One-off external audit preparation fees for 510(k) clearance."),
+            QoEAddbackItem(name="Clinic Consolidation Severance Packages", category="Restructuring", amount=0.33, rationale="One-time severance payouts following the integration of 2 regional clinics.")
+        ]
+    ),
+    PresetTemplate(
+        id="consumer-apexd2c",
+        title="ApexDirect Omnichannel Brands",
+        tagline="High-Growth Consumer Wellness & Wholesale Distribution",
+        sector="Consumer / E-Commerce",
+        target_company="ApexDirect Brand Holdings",
+        enterprise_value=14.5,
+        revenue=8.5,
+        cogs=4.2,
+        opex=2.8,
+        unadjusted_ebitda=1.5,
+        addbacks_total=0.36,
+        adjusted_ebitda=1.86,
+        default_wacc=11.8,
+        default_exit_multiple=8.5,
+        csv_content="""Account Name,Category,Amount
+Shopify Direct-to-Consumer Digital Sales,Revenue,5400000
+Target & Specialty Wholesale Purchase Orders,Revenue,3100000
+Contract Manufacturing & Formulation,COGS,2900000
+Fulfillment Logistics & 3PL Warehousing,COGS,1300000
+Digital Performance Marketing & Ad Spend,OpEx,1900000
+Brand Team & Corporate Operations,OpEx,900000
+Ocean Freight Spot Surcharge Spike,One-Time Expense,240000
+Legacy Agency Contract Early Termination Fee,One-Time Expense,120000
+Warehouse Equipment Depreciation,D&A,180000""",
+        addbacks=[
+            QoEAddbackItem(name="Ocean Freight Spot Surcharge Spike", category="Supply Chain Anomalies", amount=0.24, rationale="Historical spot shipping spike exceeding normalized contract freight rates."),
+            QoEAddbackItem(name="Agency Early Termination Fee", category="Marketing Restructuring", amount=0.12, rationale="One-time contractual penalty to bring digital marketing in-house.")
+        ]
+    )
+]
+
+@router.get("/preset-templates", response_model=List[PresetTemplate])
+async def get_preset_templates():
+    return PRESET_TEMPLATES
+
+def parse_pl_csv_text(csv_text: str, default_asking_ev: float, company_name: str, sector: str) -> PLImportResponse:
+    lines = [line.strip() for line in csv_text.strip().splitlines() if line.strip()]
+    if not lines:
+        raise HTTPException(status_code=400, detail="Provided CSV text is empty")
+    
+    total_rev = 0.0
+    total_cogs = 0.0
+    total_opex = 0.0
+    total_da = 0.0
+    addbacks: List[QoEAddbackItem] = []
+    
+    # Try using csv reader
+    reader = csv.reader(io.StringIO(csv_text))
+    rows = list(reader)
+    
+    header_skipped = False
+    parsed_count = 0
+    
+    for row in rows:
+        if not row or len(row) < 2:
+            continue
+        
+        # Check if first row is header
+        first_cell = str(row[0]).strip().lower()
+        if not header_skipped and ("account" in first_cell or "name" in first_cell or "item" in first_cell or "description" in first_cell):
+            header_skipped = True
+            continue
+        
+        account_name = str(row[0]).strip()
+        category_str = str(row[1]).strip().lower() if len(row) >= 3 else ""
+        amount_raw = str(row[2] if len(row) >= 3 else row[1]).strip()
+        
+        # Clean amount
+        clean_num = re.sub(r"[^\d.-]", "", amount_raw)
+        if not clean_num or clean_num == "-" or clean_num == ".":
+            continue
+        
+        try:
+            amt = float(clean_num)
+        except ValueError:
+            continue
+            
+        parsed_count += 1
+        acc_lower = account_name.lower()
+        
+        # Normalize dollar units if in full dollars (e.g. 15,400,000 -> 15.4M)
+        amt_millions = amt / 1_000_000.0 if abs(amt) >= 50_000 else amt
+        
+        # Categorize
+        if "revenue" in category_str or any(k in acc_lower for k in ["revenue", "sales", "arr", "mrr", "subscription", "billing", "receipts"]):
+            total_rev += amt_millions
+        elif "cogs" in category_str or "cost" in category_str or any(k in acc_lower for k in ["cogs", "hosting", "cloud infrastructure", "sensor", "supplies", "manufacturing", "fulfillment"]):
+            total_cogs += amt_millions
+        elif "d&a" in category_str or "depreciation" in category_str or any(k in acc_lower for k in ["depreciation", "amortization", "d&a"]):
+            total_da += amt_millions
+        elif "owner" in category_str or any(k in acc_lower for k in ["founder", "owner compensation", "ceo salary", "executive excess"]):
+            total_opex += amt_millions
+            addbacks.append(QoEAddbackItem(
+                name=account_name,
+                category="Owner Compensation",
+                amount=round(amt_millions * 0.5 if amt_millions > 0.5 else amt_millions, 2),
+                rationale="Normalize executive compensation down to middle-market benchmark standard."
+            ))
+        elif "one-time" in category_str or "non-recurring" in category_str or any(k in acc_lower for k in ["migration", "severance", "audit", "one-time", "lawsuit", "penalty", "restructuring", "surcharge"]):
+            total_opex += amt_millions
+            addbacks.append(QoEAddbackItem(
+                name=account_name,
+                category="One-Time / Non-Recurring",
+                amount=round(amt_millions, 2),
+                rationale="Identified as non-recurring transitional or abnormal operating expense."
+            ))
+        else:
+            total_opex += amt_millions
+            
+    # Compute summaries
+    gross_profit = round(total_rev - total_cogs, 2)
+    gross_margin_pct = round((gross_profit / total_rev * 100), 1) if total_rev > 0 else 0.0
+    unadjusted_ebitda = round(gross_profit - total_opex, 2)
+    unadjusted_ebitda_margin_pct = round((unadjusted_ebitda / total_rev * 100), 1) if total_rev > 0 else 0.0
+    total_addbacks = round(sum(a.amount for a in addbacks), 2)
+    adjusted_ebitda = round(unadjusted_ebitda + total_addbacks, 2)
+    adjusted_ebitda_margin_pct = round((adjusted_ebitda / total_rev * 100), 1) if total_rev > 0 else 0.0
+    implied_ev_multiple = round(default_asking_ev / adjusted_ebitda, 2) if adjusted_ebitda > 0 else 10.0
+    
+    return PLImportResponse(
+        company_name=company_name,
+        sector=sector,
+        revenue=round(total_rev, 2),
+        cogs=round(total_cogs, 2),
+        gross_profit=gross_profit,
+        gross_margin_pct=gross_margin_pct,
+        operating_expenses=round(total_opex, 2),
+        da=round(total_da, 2),
+        unadjusted_ebitda=unadjusted_ebitda,
+        unadjusted_ebitda_margin_pct=unadjusted_ebitda_margin_pct,
+        suggested_addbacks=addbacks,
+        total_addbacks=total_addbacks,
+        adjusted_ebitda=adjusted_ebitda,
+        adjusted_ebitda_margin_pct=adjusted_ebitda_margin_pct,
+        implied_ev_ebitda_multiple=implied_ev_multiple,
+        parsed_rows_count=parsed_count
+    )
+
+@router.post("/parse-pl", response_model=PLImportResponse)
+async def parse_pl(req: PLImportRequest):
+    """
+    Parses raw CSV or line-item P&L text, auto-calculates Gross Profit, EBITDA,
+    detects candidate QoE Add-Backs (Owner Comp, One-Time Costs), and computes
+    normalized financial metrics.
+    """
+    if req.csv_text:
+        return parse_pl_csv_text(
+            csv_text=req.csv_text,
+            default_asking_ev=req.asking_price_ev,
+            company_name=req.company_name,
+            sector=req.sector
+        )
+    
+    # Custom rows parsing
+    if req.custom_rows:
+        total_rev = 0.0
+        total_cogs = 0.0
+        total_opex = 0.0
+        total_da = 0.0
+        addbacks: List[QoEAddbackItem] = []
+        
+        for r in req.custom_rows:
+            amt_millions = r.amount / 1_000_000.0 if abs(r.amount) >= 50_000 else r.amount
+            if r.category == "revenue":
+                total_rev += amt_millions
+            elif r.category == "cogs":
+                total_cogs += amt_millions
+            elif r.category == "da":
+                total_da += amt_millions
+            else:
+                total_opex += amt_millions
+                if r.is_addback_candidate:
+                    addbacks.append(QoEAddbackItem(
+                        name=r.account_name,
+                        category="Owner Compensation" if "owner" in r.category else "One-Time Expense",
+                        amount=round(amt_millions, 2),
+                        rationale=r.suggested_addback_reason or "Identified non-recurring expense"
+                    ))
+                    
+        gross_profit = round(total_rev - total_cogs, 2)
+        gross_margin_pct = round((gross_profit / total_rev * 100), 1) if total_rev > 0 else 0.0
+        unadjusted_ebitda = round(gross_profit - total_opex, 2)
+        unadjusted_ebitda_margin_pct = round((unadjusted_ebitda / total_rev * 100), 1) if total_rev > 0 else 0.0
+        total_addbacks = round(sum(a.amount for a in addbacks), 2)
+        adjusted_ebitda = round(unadjusted_ebitda + total_addbacks, 2)
+        adjusted_ebitda_margin_pct = round((adjusted_ebitda / total_rev * 100), 1) if total_rev > 0 else 0.0
+        implied_ev_multiple = round(req.asking_price_ev / adjusted_ebitda, 2) if adjusted_ebitda > 0 else 10.0
+        
+        return PLImportResponse(
+            company_name=req.company_name,
+            sector=req.sector,
+            revenue=round(total_rev, 2),
+            cogs=round(total_cogs, 2),
+            gross_profit=gross_profit,
+            gross_margin_pct=gross_margin_pct,
+            operating_expenses=round(total_opex, 2),
+            da=round(total_da, 2),
+            unadjusted_ebitda=unadjusted_ebitda,
+            unadjusted_ebitda_margin_pct=unadjusted_ebitda_margin_pct,
+            suggested_addbacks=addbacks,
+            total_addbacks=total_addbacks,
+            adjusted_ebitda=adjusted_ebitda,
+            adjusted_ebitda_margin_pct=adjusted_ebitda_margin_pct,
+            implied_ev_ebitda_multiple=implied_ev_multiple,
+            parsed_rows_count=len(req.custom_rows)
+        )
+        
+    raise HTTPException(status_code=400, detail="Must provide either csv_text or custom_rows")
+
+@router.post("/import-deal-with-adjustments")
+async def import_deal_with_adjustments(payload: DealWithAdjustmentsCreate):
+    """
+    Atomically inserts a new deal opportunity into `deals` and adds all detected
+    QoE add-backs to `ebitda_adjustments` linked by deal id.
+    """
+    deal_dict = {
+        "name": payload.name,
+        "target_company": payload.target_company,
+        "sector": payload.sector,
+        "deal_type": payload.deal_type,
+        "stage": payload.stage,
+        "enterprise_value": payload.enterprise_value,
+        "revenue": payload.revenue,
+        "ebitda": payload.ebitda,
+        "ebitda_multiple": payload.ebitda_multiple,
+        "lead_partner": payload.lead_partner,
+        "probability_pct": payload.probability_pct,
+        "cash_required": payload.cash_required,
+        "target_close_date": payload.target_close_date,
+        "notes": payload.notes or ""
+    }
+    new_deal = Deal(**deal_dict)
+    await db.deals.insert_one(new_deal.model_dump())
+    
+    created_adjustments = []
+    if payload.adjustments:
+        for adj_data in payload.adjustments:
+            adj = EBITDAAdjustment(
+                deal_id=new_deal.id,
+                name=adj_data.name,
+                category=adj_data.category,
+                amount=adj_data.amount,
+                adjustment_type=adj_data.adjustment_type,
+                notes=adj_data.notes or f"Imported with deal {new_deal.name}"
+            )
+            await db.ebitda_adjustments.insert_one(adj.model_dump())
+            created_adjustments.append(adj)
+            
+    return {
+        "message": "Deal and QoE Adjustments imported successfully",
+        "deal": new_deal,
+        "adjustments": created_adjustments
+    }
+

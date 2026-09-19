@@ -90,3 +90,79 @@ class FinancialOverview(BaseModel):
     weighted_runway_months: float
     stage_breakdown: List[StageSummary]
     sector_breakdown: List[SectorSummary]
+
+class PLRowItem(BaseModel):
+    account_name: str
+    category: str  # "revenue", "cogs", "opex_sales", "opex_rd", "opex_ga", "da", "owner_comp", "one_time_expense", "other"
+    amount: float
+    is_addback_candidate: bool = False
+    suggested_addback_reason: Optional[str] = None
+
+class PLImportRequest(BaseModel):
+    company_name: str = "Target Corp"
+    sector: str = "SaaS / Software"
+    deal_type: str = "100% Buyout"
+    asking_price_ev: float = 35.0
+    lead_partner: str = "Marcus Vance"
+    csv_text: Optional[str] = None
+    custom_rows: Optional[List[PLRowItem]] = None
+
+class QoEAddbackItem(BaseModel):
+    name: str
+    category: str
+    amount: float
+    rationale: str
+
+class PLImportResponse(BaseModel):
+    company_name: str
+    sector: str
+    revenue: float
+    cogs: float
+    gross_profit: float
+    gross_margin_pct: float
+    operating_expenses: float
+    da: float
+    unadjusted_ebitda: float
+    unadjusted_ebitda_margin_pct: float
+    suggested_addbacks: List[QoEAddbackItem]
+    total_addbacks: float
+    adjusted_ebitda: float
+    adjusted_ebitda_margin_pct: float
+    implied_ev_ebitda_multiple: float
+    parsed_rows_count: int
+
+class DealWithAdjustmentsCreate(BaseModel):
+    name: str
+    target_company: str
+    sector: str = "SaaS / Software"
+    deal_type: str = "100% Buyout"
+    stage: str = "Due Diligence"
+    enterprise_value: float = 35.0
+    revenue: float = 12.0
+    ebitda: float = 3.0
+    ebitda_multiple: float = 11.67
+    lead_partner: str = "Marcus Vance"
+    probability_pct: int = 60
+    cash_required: float = 25.0
+    target_close_date: str = "2025-11-30"
+    notes: Optional[str] = ""
+    adjustments: List[EBITDAAdjustmentCreate] = []
+
+class PresetTemplate(BaseModel):
+    id: str
+    title: str
+    tagline: str
+    sector: str
+    target_company: str
+    enterprise_value: float
+    revenue: float
+    cogs: float
+    opex: float
+    unadjusted_ebitda: float
+    addbacks_total: float
+    adjusted_ebitda: float
+    default_wacc: float
+    default_exit_multiple: float
+    csv_content: str
+    addbacks: List[QoEAddbackItem]
+
